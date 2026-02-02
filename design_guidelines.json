@@ -1,0 +1,169 @@
+{
+  "identity": {
+    "name": "Flareonix",
+    "motto": "Rise. Ignite. Conquer.",
+    "vibe": "Rebellious, Visionary, High-Energy, Youth-Powered",
+    "archetype": "The Revolutionary / The Phoenix"
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Unbounded, sans-serif",
+      "body": "Manrope, sans-serif",
+      "accent": "Syne, sans-serif"
+    },
+    "imports": [
+      "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Syne:wght@400;700;800&family=Unbounded:wght@400;600;700;900&display=swap"
+    ],
+    "scale": {
+      "hero": "text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter uppercase",
+      "h1": "text-5xl md:text-7xl font-bold tracking-tight",
+      "h2": "text-4xl md:text-5xl font-bold tracking-tight",
+      "h3": "text-2xl md:text-3xl font-semibold",
+      "body_lg": "text-lg md:text-xl leading-relaxed",
+      "body": "text-base leading-relaxed text-muted-foreground",
+      "caption": "text-sm font-medium tracking-widest uppercase text-accent"
+    }
+  },
+  "colors": {
+    "palette": {
+      "background": "#050505",
+      "foreground": "#EDEDED",
+      "primary": "#FF4500",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#1A1A1A",
+      "secondary_foreground": "#FFFFFF",
+      "accent": "#FF6B00",
+      "accent_foreground": "#000000",
+      "muted": "#121212",
+      "muted_foreground": "#A1A1AA",
+      "border": "#27272A",
+      "input": "#27272A",
+      "ring": "#FF4500"
+    },
+    "gradients": {
+      "hero_glow": "radial-gradient(circle at center, rgba(255, 69, 0, 0.15) 0%, rgba(5, 5, 5, 0) 70%)",
+      "text_gradient": "linear-gradient(to right, #FFFFFF, #A1A1AA)",
+      "fire_gradient": "linear-gradient(135deg, #FF4500 0%, #FF8C00 100%)",
+      "card_surface": "linear-gradient(180deg, rgba(26, 26, 26, 0.6) 0%, rgba(26, 26, 26, 0.3) 100%)"
+    }
+  },
+  "layout": {
+    "grid_system": "The Bento Grid (Mode A: Tetris)",
+    "spacing": {
+      "container_padding": "px-6 md:px-12 lg:px-24",
+      "section_gap": "py-24 md:py-32",
+      "element_gap": "gap-6 md:gap-12"
+    },
+    "border_radius": {
+      "default": "rounded-none",
+      "card": "rounded-xl",
+      "button": "rounded-full"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-white hover:bg-primary/90 rounded-full px-8 py-6 text-lg font-bold tracking-wide transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(255,69,0,0.4)]",
+      "secondary": "bg-transparent border border-white/20 text-white hover:bg-white/10 rounded-full px-8 py-6 text-lg font-medium transition-all",
+      "ghost": "text-muted-foreground hover:text-primary transition-colors"
+    },
+    "cards": {
+      "style": "bg-secondary/30 backdrop-blur-md border border-white/10 hover:border-primary/50 transition-all duration-500 group relative overflow-hidden",
+      "hover_effect": "Add a subtle glow or 'tracing beam' effect on hover."
+    },
+    "inputs": {
+      "style": "bg-black/50 border-white/10 focus:border-primary focus:ring-1 focus:ring-primary/50 h-12 rounded-lg text-white placeholder:text-white/30"
+    }
+  },
+  "visual_enhancers": {
+    "textures": "Use a subtle noise texture overlay (opacity 0.03) on the entire background to kill digital flatness.",
+    "effects": [
+      "Glassmorphism: backdrop-blur-xl bg-black/40 border-white/5",
+      "Glow: Drop shadows with colored spread (e.g., shadow-[0_0_30px_-10px_rgba(255,69,0,0.3)])"
+    ],
+    "motion": {
+      "scroll": "Use 'lenis' for smooth scrolling momentum.",
+      "reveal": "Staggered fade-up animations for all text elements.",
+      "hero": "Parallax effect on the background fire image."
+    }
+  },
+  "media": {
+    "images": {
+      "hero_bg": {
+        "url": "https://images.unsplash.com/photo-1635194981985-2566733d119a",
+        "alt": "Abstract ember fire background",
+        "treatment": "Overlay with black gradient (opacity 80%) to ensure text readability."
+      },
+      "community_team": {
+        "url": "https://images.unsplash.com/photo-1558023608-bbcc13ffdc24",
+        "alt": "Diverse group of Indian youth founders",
+        "treatment": "Grayscale or desaturated with high contrast, maybe a duotone effect with orange."
+      },
+      "tech_vision": {
+        "url": "https://images.unsplash.com/photo-1753998943918-dd2dfc4ee6ed",
+        "alt": "Futuristic code on screen",
+        "treatment": "Darkened, used as a texture or in a bento grid cell."
+      },
+      "logo": {
+        "url": "https://customer-assets.emergentagent.com/job_67b702d1-b010-4e85-8987-3c95d6ed01fa/artifacts/ko2oskb5_Flareonix.png",
+        "alt": "Flareonix Phoenix Logo"
+      }
+    }
+  },
+  "sections_structure": [
+    {
+      "name": "Hero",
+      "type": "Full Screen",
+      "elements": [
+        "H1: RISE. IGNITE. CONQUER.",
+        "Sub: The youth-powered ecosystem for ambitious Indian founders.",
+        "CTA: Join The Movement (Primary), Enter Ecosystem (Secondary)",
+        "Background: Fire Abstract + Noise"
+      ]
+    },
+    {
+      "name": "About",
+      "type": "Split Layout",
+      "elements": [
+        "Left: 'Why Flareonix?' Bold Typography",
+        "Right: Mission statement text + 'Phoenix' metaphor",
+        "Visual: Minimalist fire graphic or gradient mesh"
+      ]
+    },
+    {
+      "name": "Ecosystem",
+      "type": "Bento Grid",
+      "elements": [
+        "Card 1 (Large): Community (Image of youth team)",
+        "Card 2 (Tall): AI Incubator (Tech image)",
+        "Card 3 (Square): Mentorship",
+        "Card 4 (Wide): Funding & Resources"
+      ]
+    },
+    {
+      "name": "Community",
+      "type": "Center Focus",
+      "elements": [
+        "Headline: 'Built for the Hungry'",
+        "List: Who is this for? (Students, Creators, Founders)",
+        "CTA: Join WhatsApp Channel"
+      ]
+    },
+    {
+      "name": "Contact",
+      "type": "Minimal Form",
+      "elements": [
+        "Simple Grid: Instagram Link, WhatsApp Link",
+        "Button: 'Start Your Journey' (Redirects to Google Form)"
+      ]
+    }
+  ],
+  "universal_guidelines": [
+    "DO NOT use gradients for text unless it's a very subtle white-to-grey.",
+    "Ensure all interactive elements have hover states (scale, color shift, or glow).",
+    "Use 'Unbounded' font for all Headings (H1-H3). Use 'Manrope' for body.",
+    "Primary Color #FF4500 is for high-priority actions only. Do not overuse.",
+    "Background is #050505. Never pure black #000000.",
+    "Add 'data-testid' to all interactive elements."
+  ],
+  "instructions_to_main_agent": "Implement the landing page using React + Tailwind. Use the provided image URLs. Ensure the 'Unbounded' font is imported in index.css. Use 'framer-motion' for entrance animations. The contact form is a redirect, not a backend submission."
+}
