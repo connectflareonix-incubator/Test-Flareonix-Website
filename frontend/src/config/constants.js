@@ -10,8 +10,20 @@ export const INSTAGRAM_URL = "https://instagram.com/flare.onix";
 export const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
 
-// Admin credentials display (for reference only, actual auth is server-side)
-export const ADMIN_LOGIN_HINT = {
-  username: "flareonix_admin",
-  note: "Password provided separately"
+// Admin credentials (for reference)
+export const ADMIN_CREDENTIALS = {
+  email: "connectflareonix@gmail.com",
+  note: "Password: Flareonix@admin02"
 };
+
+// Navigation links
+export const NAV_LINKS = [
+  { name: 'Home', href: '/' },
+  { name: 'About', href: '/about' },
+  { name: 'Community', href: '/community' },
+  { name: 'Agency', href: '/agency' },
+  { name: 'Freelancer Hub', href: '/freelancer-hub' },
+  { name: 'Incubator', href: '/incubator' },
+  { name: 'AI Tools', href: '/ai-tools' },
+  { name: 'Contact', href: '/contact' },
+];
