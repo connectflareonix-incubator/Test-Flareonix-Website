@@ -17,7 +17,7 @@ import ContactPage from "@/pages/ContactPage";
 import FAQPage from "@/pages/FAQPage";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
-import AdminPage from "@/pages/AdminPage";
+import AdminPanel from "@/pages/AdminPanel";
 import TestimonialsPage from "@/pages/TestimonialsPage";
 
 function AppRouter() {
@@ -49,7 +49,7 @@ function AppRouter() {
           </ProtectedRoute>
         } 
       />
-      <Route path="/admin" element={<AdminPage />} />
+      <Route path="/admin" element={<AdminPanel />} />
     </Routes>
   );
 }
