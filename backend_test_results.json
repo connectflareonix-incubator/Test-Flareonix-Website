@@ -1,7 +1,7 @@
 {
   "total_tests": 6,
-  "passed_tests": 6,
-  "success_rate": 100.0,
+  "passed_tests": 5,
+  "success_rate": 83.33333333333334,
   "results": [
     {
       "test": "API Root Endpoint",
@@ -11,7 +11,7 @@
     {
       "test": "Community Count Endpoint",
       "success": true,
-      "details": "Status: 200, Count: 0"
+      "details": "Status: 200, Count: 3"
     },
     {
       "test": "Community Signup Validation",
@@ -21,17 +21,17 @@
     {
       "test": "Community Signup Success",
       "success": true,
-      "details": "Status: 200, User ID: 1a13a1b8-2c69-4358-bfd4-0cf54cb94d4e"
+      "details": "Status: 200, User ID: 7be34b8a-3389-4a07-b411-0f0534ea8906"
     },
     {
       "test": "Duplicate Email Signup",
       "success": true,
-      "details": "Status: 400 (Expected 400 for duplicate email), Error: This email is already registered in our community!"
+      "details": "Status: 400 (Expected 400 for duplicate email), Error: This email is already registered!"
     },
     {
       "test": "Get Community Signups",
-      "success": true,
-      "details": "Status: 200, Signups count: 1"
+      "success": false,
+      "details": "Status: 404"
     }
   ]
 }
