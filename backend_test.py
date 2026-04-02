@@ -129,19 +129,129 @@ class FlareonixAPITester:
             self.log_test("Duplicate Email Signup", False, str(e))
             return False
 
-    def test_get_community_signups(self):
-        """Test get community signups endpoint (admin)"""
+    def test_admin_verify(self):
+        """Test admin verification with Basic Auth"""
         try:
-            response = requests.get(f"{self.api_url}/community/signups", timeout=10)
+            # Test with correct credentials
+            auth = ('connectflareonix@gmail.com', 'Flareonix@admin02')
+            response = requests.get(f"{self.api_url}/admin/verify", auth=auth, timeout=10)
             success = response.status_code == 200
             details = f"Status: {response.status_code}"
             if success:
                 data = response.json()
-                details += f", Signups count: {len(data)}"
-            self.log_test("Get Community Signups", success, details)
+                details += f", Success: {data.get('success', False)}"
+            self.log_test("Admin Verify (Valid Credentials)", success, details)
+            return success, auth
+        except Exception as e:
+            self.log_test("Admin Verify (Valid Credentials)", False, str(e))
+            return False, None
+
+    def test_admin_verify_invalid(self):
+        """Test admin verification with invalid credentials"""
+        try:
+            # Test with wrong credentials
+            auth = ('wrong@email.com', 'wrongpassword')
+            response = requests.get(f"{self.api_url}/admin/verify", auth=auth, timeout=10)
+            success = response.status_code == 401  # Unauthorized expected
+            details = f"Status: {response.status_code} (Expected 401 for invalid credentials)"
+            self.log_test("Admin Verify (Invalid Credentials)", success, details)
             return success
         except Exception as e:
-            self.log_test("Get Community Signups", False, str(e))
+            self.log_test("Admin Verify (Invalid Credentials)", False, str(e))
+            return False
+
+    def test_contact_form(self):
+        """Test contact form submission"""
+        try:
+            timestamp = datetime.now().strftime("%H%M%S")
+            contact_data = {
+                "name": f"Test User {timestamp}",
+                "email": f"test{timestamp}@example.com",
+                "subject": "Test Subject",
+                "message": "This is a test message from automated testing."
+            }
+            
+            response = requests.post(f"{self.api_url}/contact", json=contact_data, timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            if success:
+                data = response.json()
+                details += f", Message ID: {data.get('id', 'No ID')}"
+            self.log_test("Contact Form Submission", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Contact Form Submission", False, str(e))
+            return False
+
+    def test_reviews_approved(self):
+        """Test get approved reviews endpoint"""
+        try:
+            response = requests.get(f"{self.api_url}/reviews/approved", timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            if success:
+                data = response.json()
+                details += f", Reviews count: {len(data)}"
+            self.log_test("Get Approved Reviews", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Get Approved Reviews", False, str(e))
+            return False
+
+    def test_analytics_pageview(self):
+        """Test analytics pageview tracking"""
+        try:
+            analytics_data = {
+                "page": "/test-page",
+                "referrer": "https://google.com",
+                "session_id": f"test_session_{datetime.now().strftime('%H%M%S')}"
+            }
+            
+            response = requests.post(f"{self.api_url}/analytics/pageview", json=analytics_data, timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            if success:
+                data = response.json()
+                details += f", Success: {data.get('success', False)}"
+            self.log_test("Analytics Pageview Tracking", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Analytics Pageview Tracking", False, str(e))
+            return False
+
+    def test_case_studies(self):
+        """Test case studies endpoint"""
+        try:
+            response = requests.get(f"{self.api_url}/case-studies", timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            if success:
+                data = response.json()
+                details += f", Case studies count: {len(data)}"
+            self.log_test("Get Case Studies", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Get Case Studies", False, str(e))
+            return False
+
+    def test_admin_dashboard(self, auth):
+        """Test admin dashboard endpoint"""
+        if not auth:
+            self.log_test("Admin Dashboard", False, "No auth credentials from previous test")
+            return False
+            
+        try:
+            response = requests.get(f"{self.api_url}/admin/dashboard", auth=auth, timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            if success:
+                data = response.json()
+                stats = data.get('stats', {})
+                details += f", Total users: {stats.get('total_users', 0)}"
+            self.log_test("Admin Dashboard", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Admin Dashboard", False, str(e))
             return False
 
     def run_all_tests(self):
@@ -161,7 +271,18 @@ class FlareonixAPITester:
         success, test_email = self.test_community_signup_success()
         if success and test_email:
             self.test_duplicate_email_signup(test_email)
-        self.test_get_community_signups()
+
+        # Test admin endpoints
+        admin_success, admin_auth = self.test_admin_verify()
+        self.test_admin_verify_invalid()
+        if admin_success and admin_auth:
+            self.test_admin_dashboard(admin_auth)
+
+        # Test other endpoints
+        self.test_contact_form()
+        self.test_reviews_approved()
+        self.test_analytics_pageview()
+        self.test_case_studies()
 
         return self.get_summary()
 
