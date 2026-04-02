@@ -1,66 +1,75 @@
 import React from 'react';
-import { Instagram, ArrowUp } from 'lucide-react';
-
-const LOGO_URL = "https://customer-assets.emergentagent.com/job_67b702d1-b010-4e85-8987-3c95d6ed01fa/artifacts/ko2oskb5_Flareonix.png";
-const INSTAGRAM_URL = "https://instagram.com/flare.onix";
+import { Link } from 'react-router-dom';
+import { Instagram, ArrowUp, Flame } from 'lucide-react';
+import { LOGO_URL, INSTAGRAM_URL, WHATSAPP_URL } from '@/config/constants';
 
 const Footer = () => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const navLinks = [
-    { name: 'About', href: '#about' },
-    { name: 'Ecosystem', href: '#ecosystem' },
-    { name: 'Community', href: '#community' },
-    { name: 'Vision', href: '#vision' },
-    { name: 'Contact', href: '#contact' },
+  const quickLinks = [
+    { name: 'About Us', href: '/about' },
+    { name: 'Community', href: '/community' },
+    { name: 'Agency', href: '/agency' },
+    { name: 'Freelancer Hub', href: '/freelancer-hub' },
+    { name: 'Incubator', href: '/incubator' },
   ];
 
-  const scrollToSection = (href) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const resourceLinks = [
+    { name: 'AI Tools', href: '/ai-tools' },
+    { name: 'Testimonials', href: '/testimonials' },
+    { name: 'FAQ', href: '/faq' },
+    { name: 'Contact', href: '/contact' },
+  ];
 
   return (
-    <footer 
-      className="relative bg-[#050505] border-t border-white/5 py-12 md:py-16"
-      data-testid="footer"
-    >
+    <footer className="relative bg-[#050505] border-t border-white/5 py-16" data-testid="footer">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <div className="grid md:grid-cols-3 gap-12 md:gap-8 mb-12">
+        <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <img 
-                src={LOGO_URL} 
-                alt="Flareonix" 
-                className="h-10 w-auto"
-              />
-            </div>
+          <div className="md:col-span-1 space-y-4">
+            <Link to="/" className="flex items-center gap-2">
+              <img src={LOGO_URL} alt="Flareonix" className="h-12 w-auto" />
+            </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              The youth-powered, AI-driven startup ecosystem for ambitious Indian founders.
+              Where creators are reborn. Build your identity. Earn. Grow. Dominate.
             </p>
-            <p className="text-primary font-heading font-bold text-sm italic">
+            <p className="text-primary font-heading font-bold text-sm italic flex items-center gap-2">
+              <Flame className="h-4 w-4" />
               Rise. Ignite. Conquer.
             </p>
           </div>
 
-          {/* Navigation */}
+          {/* Quick Links */}
           <div>
             <h4 className="text-white font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
-              {navLinks.map((link) => (
+              {quickLinks.map((link) => (
                 <li key={link.name}>
-                  <button
-                    onClick={() => scrollToSection(link.href)}
+                  <Link
+                    to={link.href}
                     className="text-muted-foreground hover:text-primary transition-colors text-sm"
-                    data-testid={`footer-link-${link.name.toLowerCase()}`}
                   >
                     {link.name}
-                  </button>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Resources */}
+          <div>
+            <h4 className="text-white font-semibold mb-4">Resources</h4>
+            <ul className="space-y-2">
+              {resourceLinks.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    to={link.href}
+                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                  >
+                    {link.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -75,10 +84,17 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
-                data-testid="footer-instagram"
               >
                 <Instagram className="h-4 w-4" />
                 @flare.onix
+              </a>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
+              >
+                WhatsApp Channel
               </a>
             </div>
           </div>
@@ -89,8 +105,6 @@ const Footer = () => {
           <p className="text-muted-foreground text-sm mb-4 md:mb-0">
             © {new Date().getFullYear()} Flareonix. All rights reserved.
           </p>
-          
-          {/* Back to top */}
           <button
             onClick={scrollToTop}
             className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm group"
