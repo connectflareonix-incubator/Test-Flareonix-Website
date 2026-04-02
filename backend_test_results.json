@@ -1,7 +1,7 @@
 {
-  "total_tests": 6,
-  "passed_tests": 5,
-  "success_rate": 83.33333333333334,
+  "total_tests": 12,
+  "passed_tests": 12,
+  "success_rate": 100.0,
   "results": [
     {
       "test": "API Root Endpoint",
@@ -11,7 +11,7 @@
     {
       "test": "Community Count Endpoint",
       "success": true,
-      "details": "Status: 200, Count: 3"
+      "details": "Status: 200, Count: 4"
     },
     {
       "test": "Community Signup Validation",
@@ -21,7 +21,7 @@
     {
       "test": "Community Signup Success",
       "success": true,
-      "details": "Status: 200, User ID: 7be34b8a-3389-4a07-b411-0f0534ea8906"
+      "details": "Status: 200, User ID: 3c2bfed5-8624-4726-8776-40b7e5209c41"
     },
     {
       "test": "Duplicate Email Signup",
@@ -29,9 +29,39 @@
       "details": "Status: 400 (Expected 400 for duplicate email), Error: This email is already registered!"
     },
     {
-      "test": "Get Community Signups",
-      "success": false,
-      "details": "Status: 404"
+      "test": "Admin Verify (Valid Credentials)",
+      "success": true,
+      "details": "Status: 200, Success: True"
+    },
+    {
+      "test": "Admin Verify (Invalid Credentials)",
+      "success": true,
+      "details": "Status: 401 (Expected 401 for invalid credentials)"
+    },
+    {
+      "test": "Admin Dashboard",
+      "success": true,
+      "details": "Status: 200, Total users: 0"
+    },
+    {
+      "test": "Contact Form Submission",
+      "success": true,
+      "details": "Status: 200, Message ID: 9cea6ae7-57d7-4fe1-92ef-5b323a877987"
+    },
+    {
+      "test": "Get Approved Reviews",
+      "success": true,
+      "details": "Status: 200, Reviews count: 0"
+    },
+    {
+      "test": "Analytics Pageview Tracking",
+      "success": true,
+      "details": "Status: 200, Success: True"
+    },
+    {
+      "test": "Get Case Studies",
+      "success": true,
+      "details": "Status: 200, Case studies count: 0"
     }
   ]
 }
