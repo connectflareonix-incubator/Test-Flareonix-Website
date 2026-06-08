@@ -5,6 +5,11 @@ import { Flame, ArrowRight, Users, Brain, Rocket, Trophy, Zap, Target } from 'lu
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PhoenixSilhouette from '@/components/decor/PhoenixSilhouette';
+import PhoenixDivider from '@/components/decor/PhoenixDivider';
+import SocialProofCounter from '@/components/decor/SocialProofCounter';
+import TrustBadgeRow from '@/components/decor/TrustBadgeRow';
+import EmberBadge from '@/components/decor/EmberBadge';
 import { useAuth } from '@/context/AuthContext';
 import { LOGO_URL } from '@/config/constants';
 import { trackPageView, trackClick } from '@/utils/analytics';
@@ -123,6 +128,24 @@ const HomePage = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.1 }}
+            className="mt-8"
+          >
+            <TrustBadgeRow />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.3 }}
+            className="mt-12"
+          >
+            <SocialProofCounter />
           </motion.div>
         </div>
 
@@ -307,6 +330,9 @@ const HomePage = () => {
               <Flame className="mr-2 h-5 w-5" />
               Join Flareonix Now
             </Button>
+            <div className="mt-6">
+              <EmberBadge>Limited Strategy Slots Available</EmberBadge>
+            </div>
           </motion.div>
         </div>
       </section>

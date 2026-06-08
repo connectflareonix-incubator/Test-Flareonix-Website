@@ -1,122 +1,90 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Lock, ArrowLeft, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { API } from '@/config/constants';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Lock, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { API } from '@/config/constants';
+import { adminGetCreds, adminSetCreds } from '@/components/admin/adminAuth';
+import AdminLayout from '@/components/admin/AdminLayout';
+import Dashboard from '@/components/admin/sections/Dashboard';
+import Blog from '@/components/admin/sections/Blog';
+import Team from '@/components/admin/sections/Team';
+import Projects from '@/components/admin/sections/Projects';
+import Collaborations from '@/components/admin/sections/Collaborations';
+import Inbox from '@/components/admin/sections/Inbox';
+import Feedback from '@/components/admin/sections/Feedback';
+import Users from '@/components/admin/sections/Users';
+import Announcements from '@/components/admin/sections/Announcements';
+import Settings from '@/components/admin/sections/Settings';
 
-function AdminPanel() {
-  const navigate = useNavigate();
-  const [auth, setAuth] = useState(false);
+const LoginScreen = ({ onSuccess }) => {
   const [email, setEmail] = useState('');
   const [pwd, setPwd] = useState('');
-  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const nav = useNavigate();
 
-  const getAuth = () => ({ auth: { username: email, password: pwd } });
-
-  const login = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.get(API + '/admin/verify', getAuth());
-      setAuth(true);
-      toast.success('Logged in!');
-      load();
-    } catch (err) { toast.error('Invalid credentials'); }
+      await axios.get(`${API}/admin/verify`, { auth: { username: email, password: pwd } });
+      adminSetCreds(email, pwd);
+      toast.success('Logged in');
+      onSuccess();
+    } catch { toast.error('Invalid credentials'); }
     setLoading(false);
   };
-
-  const load = async () => {
-    setLoading(true);
-    try {
-      const dashRes = await axios.get(API + '/admin/dashboard', getAuth());
-      setData(dashRes.data);
-    } catch (err) { toast.error('Failed to load'); }
-    setLoading(false);
-  };
-
-  const exportData = async (type) => {
-    try {
-      const r = await axios.get(API + '/admin/export/' + type, getAuth());
-      const b = new Blob([JSON.stringify(r.data, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a'); 
-      a.href = URL.createObjectURL(b); 
-      a.download = type + '.json'; 
-      a.click();
-      toast.success('Exported!');
-    } catch (err) { toast.error('Failed'); }
-  };
-
-  if (!auth) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <Lock className="h-12 w-12 text-primary mx-auto mb-4" />
-            <h1 className="font-heading text-2xl font-bold text-white">Admin Login</h1>
-            <p className="text-muted-foreground mt-2">Email: connectflareonix@gmail.com</p>
-          </div>
-          <form onSubmit={login} className="p-6 glass rounded-xl border border-white/10 space-y-4">
-            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className="bg-black/50 border-white/10 text-white" required data-testid="admin-email" />
-            <Input type="password" value={pwd} onChange={e => setPwd(e.target.value)} placeholder="Password" className="bg-black/50 border-white/10 text-white" required data-testid="admin-password" />
-            <Button type="submit" disabled={loading} className="w-full bg-primary" data-testid="admin-login-btn">{loading ? 'Loading...' : 'Login'}</Button>
-          </form>
-          <button onClick={() => navigate('/')} className="flex items-center gap-2 text-muted-foreground mx-auto mt-4"><ArrowLeft className="h-4 w-4" />Home</button>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-[#050505]">
-      <div className="bg-[#0a0a0a] border-b border-white/10 p-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="font-heading text-lg font-bold text-white">Admin Panel</h1>
-          <div className="flex gap-2">
-            <Button size="sm" variant="ghost" onClick={load} className="text-white"><RefreshCw className={'h-4 w-4 ' + (loading ? 'animate-spin' : '')} /></Button>
-            <Button size="sm" variant="ghost" onClick={() => navigate('/')} className="text-white"><ArrowLeft className="h-4 w-4" /></Button>
-          </div>
+    <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center p-6">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <Lock className="h-10 w-10 text-[#FF6B00] mx-auto mb-3" />
+          <h1 className="font-heading text-2xl font-bold text-white">Flareonix Admin</h1>
+          <p className="text-white/50 mt-1 text-sm">Sign in with your admin credentials</p>
         </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto p-6">
-        {data && data.stats ? (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 glass rounded-lg border border-white/10">
-                <div className="text-2xl font-bold text-white">{data.stats.total_users}</div>
-                <div className="text-xs text-muted-foreground">Total Users</div>
-              </div>
-              <div className="p-4 glass rounded-lg border border-white/10">
-                <div className="text-2xl font-bold text-white">{data.stats.total_signups}</div>
-                <div className="text-xs text-muted-foreground">Community Signups</div>
-              </div>
-              <div className="p-4 glass rounded-lg border border-white/10">
-                <div className="text-2xl font-bold text-white">{data.stats.pending_reviews}</div>
-                <div className="text-xs text-muted-foreground">Pending Reviews</div>
-              </div>
-              <div className="p-4 glass rounded-lg border border-white/10">
-                <div className="text-2xl font-bold text-white">{data.stats.unread_messages}</div>
-                <div className="text-xs text-muted-foreground">Unread Messages</div>
-              </div>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <Button size="sm" variant="outline" onClick={() => exportData('users')} className="text-white border-white/20">Export Users</Button>
-              <Button size="sm" variant="outline" onClick={() => exportData('signups')} className="text-white border-white/20">Export Signups</Button>
-              <Button size="sm" variant="outline" onClick={() => exportData('reviews')} className="text-white border-white/20">Export Reviews</Button>
-              <Button size="sm" variant="outline" onClick={() => exportData('messages')} className="text-white border-white/20">Export Messages</Button>
-            </div>
-            <p className="text-muted-foreground text-sm">Full admin features available. Export data as JSON for detailed analysis.</p>
-          </div>
-        ) : (
-          <p className="text-muted-foreground">Loading data...</p>
-        )}
+        <form onSubmit={submit} className="p-6 bg-[#161616] border border-white/10 rounded-xl space-y-4">
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email"
+            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:border-[#FF6B00] outline-none"
+            required data-testid="admin-email" />
+          <input type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="Password"
+            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:border-[#FF6B00] outline-none"
+            required data-testid="admin-password" />
+          <button type="submit" disabled={loading}
+            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white"
+            style={{ background: 'linear-gradient(135deg, #FF6B00, #CC2200)' }}
+            data-testid="admin-login-btn">{loading ? 'Signing in…' : 'Sign in'}</button>
+        </form>
+        <button onClick={() => nav('/')} className="flex items-center gap-2 text-white/50 mx-auto mt-4 text-sm">
+          <ArrowLeft className="h-4 w-4" />Back to site
+        </button>
       </div>
     </div>
   );
-}
+};
+
+const AdminPanel = () => {
+  const [authed, setAuthed] = useState(!!adminGetCreds());
+
+  if (!authed) return <LoginScreen onSuccess={() => setAuthed(true)} />;
+
+  return (
+    <AdminLayout>
+      <Routes>
+        <Route path="/" element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="blog" element={<Blog />} />
+        <Route path="team" element={<Team />} />
+        <Route path="projects" element={<Projects />} />
+        <Route path="collaborations" element={<Collaborations />} />
+        <Route path="inbox" element={<Inbox />} />
+        <Route path="feedback" element={<Feedback />} />
+        <Route path="users" element={<Users />} />
+        <Route path="announcements" element={<Announcements />} />
+        <Route path="settings" element={<Settings />} />
+      </Routes>
+    </AdminLayout>
+  );
+};
 
 export default AdminPanel;

@@ -1,9 +1,12 @@
 import "@/App.css";
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/context/AuthContext";
 import AuthCallback from "@/components/AuthCallback";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AnnouncementBanner from "@/components/AnnouncementBanner";
+import { startSparkEngine } from "@/lib/sparkEngine";
 
 // Pages
 import HomePage from "@/pages/HomePage";
@@ -49,16 +52,20 @@ function AppRouter() {
           </ProtectedRoute>
         } 
       />
-      <Route path="/admin" element={<AdminPanel />} />
+      <Route path="/admin/*" element={<AdminPanel />} />
     </Routes>
   );
 }
 
 function App() {
+  useEffect(() => {
+    startSparkEngine();
+  }, []);
   return (
     <div className="App">
       <BrowserRouter>
         <AuthProvider>
+          <AnnouncementBanner />
           <AppRouter />
         </AuthProvider>
       </BrowserRouter>

@@ -46,7 +46,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Noise texture overlay */
 body::before {
   content: "";
   position: fixed;

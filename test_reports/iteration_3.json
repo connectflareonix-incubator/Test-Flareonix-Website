@@ -1,0 +1,44 @@
+{
+  "summary": "Iteration 3 testing of Flareonix Prompt 1: completed e2e backend pytest suite (26 tests) for content+admin endpoints AND frontend smoke + admin panel walkthrough. Fixed 1 root-cause backend bug (MongoDB ObjectId leak in POST responses) which was causing 500s on 7 create endpoints. After the fix, ALL 26 backend tests pass (100%) and all 10 admin sections render correctly with charts, sidebar, and seeded data. Spark engine canvas confirmed on home + admin. All public pages load.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_content_admin.py",
+    "/app/backend/tests/test_ai_tools_and_regression.py",
+    "/app/test_reports/pytest/content_admin_results.xml"
+  ],
+  "action_items": [
+    "(FIXED by testing agent) MongoDB ObjectId was being returned in JSON responses of POST endpoints because pymongo's insert_one() mutates the dict in-place to add _id. Fix applied in /app/backend/content_routes.py: updated _serialize_doc() to pop _id, and replaced bare 'return c' in admin_create_collab with _serialize_doc(c). Main agent: please confirm fix style is acceptable; no functional change."
+  ],
+  "critical_code_review_comments": [
+    "content_routes.py: every POST handler relied on _serialize_doc which previously did NOT strip MongoDB _id. After insert_one mutates the dict in-place, FastAPI's jsonable_encoder choked on ObjectId. Now fixed.",
+    "AdminLayout/AdminPanel — all 10 sidebar links render and route correctly; nav state highlights active item.",
+    "Chart.js dashboard has 4 canvas charts (signups line, pageviews line, contacts bar, inquiry doughnut) plus the global spark canvas, total 5 — verified.",
+    "Single-active enforcement on /api/admin/announcements works correctly via update_many before insert/update.",
+    "Ban-user flow correctly wipes user_sessions via delete_many on is_banned=True — verified.",
+    "/api/settings PUT correctly upserts and is reflected immediately on GET /api/settings.",
+    "Suggestion (non-blocking): server.py also has its own /api/admin/users (line ~638) which conflicts with the one in content_routes.py (admin_list_users). Currently the content_routes one wins via include_router order; consider removing the duplicate in server.py to avoid future confusion.",
+    "Suggestion (non-blocking): /api/contact (legacy) and /api/contact/submit (new) coexist with different schemas — main agent should consolidate eventually but no functional issue right now."
+  ],
+  "updated_files": [
+    "/app/backend/content_routes.py (added _id strip in _serialize_doc; wrapped admin_create_collab return with _serialize_doc)",
+    "/app/backend/tests/test_content_admin.py (NEW pytest suite, 26 tests)"
+  ],
+  "success_rate": {
+    "backend": "100% (26/26 after fix)",
+    "frontend": "100% (all checked flows pass; no blocking console errors — 401s are expected /auth/me polls when not logged in)"
+  },
+  "test_credentials": "Admin HTTP Basic Auth: connectflareonix@gmail.com / Flareonix@admin02. Test user is seeded directly into MongoDB by the pytest fixture and cleaned up at end.",
+  "seed_data_creation": "Tests create TEST_-prefixed blog posts, team members, projects, collaborations, contact submissions, testimonials, announcements, and a test user + session via direct MongoDB insert. All cleaned up by test_zz_cleanup and individual test teardowns.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend test file /app/backend/tests/test_content_admin.py covers all new content/admin endpoints. AI generate endpoint NOT tested in this iteration (only /api/ai/tools list) — was already covered by test_ai_tools_and_regression.py from prev iteration. If main agent introduces new POST endpoints that return the saved doc, ensure _id is stripped (use _serialize_doc helper in content_routes.py). Spark canvas selector: #flareonix-spark-canvas.",
+  "rca of the issue": "ROOT CAUSE: pymongo's insert_one() mutates the passed document dict in-place by adding a MongoDB ObjectId at key '_id'. The POST handlers in content_routes.py (e.g. admin_create_post, admin_create_team, admin_create_project, admin_create_collab, admin_create_testimonial, admin_create_announcement, submit_contact, add_comment) returned that same dict after passing through _serialize_doc(). The original _serialize_doc only converted datetime → ISO, it did NOT strip the _id ObjectId. FastAPI then tried jsonable_encoder on ObjectId → TypeError → 500 Internal Server Error. REPRODUCTION: POST /api/admin/team with valid Basic Auth + {name,role} body → 500. MITIGATION: Updated _serialize_doc to pop '_id' before serialization, and also wrapped admin_create_collab's raw 'return c' with _serialize_doc(c) (it was the one create handler that bypassed the helper). After fix, all create endpoints return clean JSON with id (uuid4) only."
+}

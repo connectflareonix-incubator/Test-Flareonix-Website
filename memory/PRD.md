@@ -1,105 +1,130 @@
-# Flareonix - Product Requirements Document
+# Flareonix — Product Requirements Document
 
 ## Original Problem Statement
-Build a complete multi-page, high-performance website for Flareonix - a youth-powered, AI-driven startup ecosystem and incubator for ambitious Indians. The website should feel like a movement, launchpad, and future incubator.
+Build a complete multi-page, high-performance website for Flareonix — India's youth-powered startup incubator and growth ecosystem. The website should feel like a movement, launchpad, and incubator, with cinematic visuals, a fire/phoenix theme, and a full operations admin panel.
 
 ## Brand Identity
 - **Name:** Flareonix
-- **Motto:** "Rise. Ignite. Conquer."
-- **Instagram:** @flare.onix
-- **Logo:** Phoenix bird in red/orange (transparent background)
-- **Personality:** Bold, Visionary, Youth-driven, Rebellious
+- **Tagline:** "Rise. Ignite. Conquer."
+- **Mission:** Discover raw talent, ignite bold ideas, and scale the next generation of founders from Tier 2/3 India.
+- **Audience:** Founders & creators aged 16–28 across Tier 2/3 India.
+- **Logo:** Phoenix bird (red/orange, transparent BG)
 
-## User Personas
-1. **Students** - Aspiring entrepreneurs with startup dreams
-2. **Freelancers** - Ready to scale to business owners
-3. **First-generation founders** - No prior startup background
-4. **Content Creators** - Want to build products
-5. **Hustlers** - Seeking financial independence
+## Personas
+1. Students (aspiring entrepreneurs)
+2. Freelancers scaling to business owners
+3. First-generation founders
+4. Content Creators
+5. Hustlers seeking financial independence
 
-## Core Requirements (Static)
-- Dark theme with fiery orange (#FF4500) accents
-- Premium, futuristic, intense feel
-- Mobile-first, responsive design
-- SEO-optimized structure
-- Smooth animations (Framer Motion)
+## Core Visual System
+- Dark theme (#0D0D0D base) with fire palette: `#FF6B00`, `#FF8C00`, `#FFB300`, `#CC2200`, `#FF4500`
+- Custom Spark engine (canvas-based) — ambient sparks, cursor trail, hover bursts, page-transition radial explosion, repulsion field, FPS-adaptive
+- Decorative SVGs: FlameIcon, PhoenixDivider, RisingArrow, EmberBadge, PhoenixSilhouette
+- Social-proof counter, Trust badge row
+- SEO-optimised (OG tags, meta description from MISSION)
 
-## What's Been Implemented (April 2, 2026)
+## Authentication
+- **User auth:** Emergent Google OAuth (`/api/auth/session`)
+- **Admin auth:** HTTP Basic Auth (kept as-is per user choice)
+  - Email: `connectflareonix@gmail.com`
+  - Password: `Flareonix@admin02`
 
-### Pages Built
-- [x] Home - Hero with logo, tagline, CTAs, features, stats
-- [x] About - Why Flareonix exists, vision, values
-- [x] Community - Separate Founders & Freelancers sections
-- [x] Agency - Digital marketing services with case studies
-- [x] Freelancer Hub - Skills, journey, earning potential
-- [x] Incubator - Coming Soon with program details
-- [x] AI Tools - Coming Soon with tool previews
-- [x] Contact - Contact form with social links
-- [x] FAQ - Categorized questions
-- [x] Login - Google OAuth integration
-- [x] Dashboard - User profile and reviews
-- [x] Admin Panel - Stats, data export
-- [x] Testimonials - Approved reviews display
+## Backend Stack
+- FastAPI + MongoDB (motor async)
+- `EMERGENT_LLM_KEY` in `.env` for Claude Sonnet 4.5 via `emergentintegrations`
+- DB auto-init on startup (`db_init.py`) — indexes + default settings + seed team/projects/webhook
 
-### Backend Features
-- [x] User authentication via Emergent Google OAuth
-- [x] User session management
-- [x] Admin Basic Auth (connectflareonix@gmail.com)
-- [x] Community signup API
-- [x] Reviews API (CRUD + moderation)
-- [x] Case studies API (admin CRUD)
-- [x] Contact messages API
-- [x] Analytics tracking (pageviews, clicks)
-- [x] Data export (JSON)
+### Collections & Indexes
+- `users`, `user_sessions`, `blog_posts`, `blog_comments`, `team_members`, `projects`, `collaborations`,
+  `contact_submissions`, `testimonials`, `case_studies`, `announcements`, `site_settings`,
+  `webhook_endpoints`, `ai_generations`, `analytics_pageviews`, `analytics_clicks`, `community_signups`, `reviews`
 
-### Admin Capabilities
-- View dashboard stats
-- Export users, signups, reviews, messages as JSON
-- Approve/reject reviews
-- Manage case studies
+## Implemented Features (Feb 2026)
 
-## Admin Credentials
-- **Email:** connectflareonix@gmail.com
-- **Password:** Flareonix@admin02
+### Pages
+- Home (Phoenix silhouette hero, TrustBadgeRow, SocialProofCounter, EmberBadge urgency)
+- About, Community, Agency, Freelancer Hub, Incubator, AI Tools, Contact, FAQ
+- Login, Dashboard, Testimonials
 
-## External Integrations
-- Google OAuth: Emergent-managed (auth.emergentagent.com)
-- Google Form: Linked for applications
-- WhatsApp Channel: Community redirect
-- Instagram: @flare.onix
+### AI Tools (powered by Claude Sonnet 4.5)
+- Caption Generator, Ad Copy Writer, Business Idea Generator, Content Calendar, Email Writer, Pitch Deck Assistant
+- Login-gated; history stored per user with copy/delete
+
+### Admin Panel (`/admin/*`)
+- Modular sub-pages (small Babel-safe files in `/components/admin/sections/`)
+- **Dashboard** — real-time stat cards, signups/pageviews line charts (Chart.js), inquiry-type bar+doughnut, webhook config
+- **Blog** — list, RTE editor (TipTap), drafts/publish, featured image upload (base64), tags, comments inbox with admin replies
+- **Team Gallery** — CRUD with photo uploads (base64), display order
+- **Projects** — CRUD with status, client, outcomes, testimonial, tags
+- **Collaborations** — CRUD by type (Event/Knowledge/Startup/Sponsor)
+- **Inbox** — Contact Forms tab (CSV export), Freelancer/Founder external-form tabs with Calendly hint
+- **Feedback & Reviews** — testimonial approval + user-review moderation, CSV exports
+- **Users** — search, role filter, ban/promote, CSV export
+- **Announcements** — site-wide banner, dismissible, single-active enforcement
+- **Settings** — editable site_settings (contact, social, stats, tagline, mission)
+
+### Public API (highlights)
+- `GET /api/settings`, `GET /api/team`, `GET /api/projects`, `GET /api/collaborations`
+- `GET /api/blog/posts`, `GET /api/blog/posts/{slug}` (+ view increment), `POST /api/blog/posts/{id}/comments`
+- `GET /api/testimonials`, `GET /api/announcements/active`
+- `POST /api/contact/submit` (fires Zapier webhook if configured)
+- `GET /api/ai/tools`, `POST /api/ai/generate`, `GET /api/ai/history`
+
+### Admin API (HTTP Basic)
+- `/api/admin/blog/*`, `/api/admin/blog/comments/*`
+- `/api/admin/team/*`, `/api/admin/projects/*`, `/api/admin/collaborations/*`
+- `/api/admin/contact-submissions/*`, `/api/admin/testimonials/*`, `/api/admin/announcements/*`
+- `/api/admin/users/*`, `/api/admin/settings/{key}`, `/api/admin/webhooks/*`
+- `/api/admin/metrics/overview`, `/api/admin/metrics/timeseries?days=N`
+
+## Architecture
+```
+/app/backend/
+  server.py            # Auth, users, community signups, reviews, case studies, analytics
+  ai_tools.py          # Claude Sonnet 4.5 endpoints
+  content_routes.py    # Blog, team, projects, collabs, contacts, testimonials, announcements, settings, webhooks, metrics
+  models_extra.py      # Pydantic models for the above
+  db_init.py           # Indexes + default seed
+
+/app/frontend/src/
+  pages/               # HomePage, AboutPage, AIToolsPage, AdminPanel, ...
+  components/
+    admin/
+      sections/        # Dashboard, Blog, Team, Projects, ... (one per page)
+      uikit/           # Small modular UI primitives (Babel-safe)
+      AdminLayout, adminApi, adminAuth, RichTextEditor
+    ai/                # Tool grid, workspace, history
+    decor/             # FlameIcon, PhoenixDivider, RisingArrow, EmberBadge, PhoenixSilhouette, TrustBadgeRow, SocialProofCounter
+    AnnouncementBanner.jsx
+  lib/sparkEngine.js   # Canvas particle system
+  config/constants.js  # Brand constants
+```
+
+## Babel Plugin Workaround
+The visual-edits Babel plugin can crash with stack-overflow / cross-file traversal errors on large multi-component files. Mitigation: keep `.jsx` files small (<150 lines, ideally <80) and put one logical component per file. All admin sections follow this rule.
 
 ## Prioritized Backlog
 
-### P0 (Completed)
-- [x] All core pages
-- [x] User authentication
-- [x] Admin panel
-- [x] Reviews system
+### P0 (Done)
+- All core public pages
+- User & admin auth
+- AI Tools (Claude 4.5)
+- Full admin panel with analytics
+- Spark engine & theme overhaul
 
-### P1 (Future - Phase 2)
-- [ ] Full community dashboard with discussions
-- [ ] Gamification (levels, badges, streaks)
-- [ ] AI tools implementation
-- [ ] Freelancer gigs marketplace
-- [ ] Incubator application system
+### P1 (Future)
+- Public Blog page rendering posts with comments UI
+- Public Team Gallery + Projects pages bound to admin CMS
+- Community discussion feed (signed-in users)
+- Gamification (levels, badges, daily streaks)
+- Phone OTP login
+- Email notifications (signups, review approval)
 
-### P2 (Nice to Have)
-- [ ] Phone OTP login
-- [ ] Email notifications
-- [ ] Leaderboards
-- [ ] Event calendar
-- [ ] Advanced analytics dashboard
+### P2 (Nice to have)
+- Leaderboards
+- Event calendar
+- Advanced cohort analytics
 
-## Architecture
-- **Frontend:** React + Tailwind CSS + Framer Motion
-- **Backend:** FastAPI + MongoDB
-- **Auth:** Emergent Google OAuth
-- **Styling:** Dark theme with Unbounded + Manrope fonts
-- **Components:** Shadcn/UI
-
-## Next Tasks
-1. Implement gamification features (levels, badges)
-2. Build AI tools (caption generator, ad copy writer)
-3. Create freelancer gigs marketplace
-4. Add incubator application form
-5. Implement email notifications for signups/reviews
+## Credentials
+See `/app/memory/test_credentials.md`.
