@@ -104,3 +104,74 @@ h1, h2, h3, h4, h5, h6 {
     display: contents !important;
   }
 }
+
+
+/* Flareonix scroll-in animations (IntersectionObserver driven via animationEngine.js) */
+[data-animate="fade-up"] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+[data-animate="fade-in"] {
+  opacity: 0;
+  transition: opacity 400ms ease-out;
+}
+[data-animate="scale-up"] {
+  opacity: 0;
+  transform: scale(0.94) translateY(16px);
+  transition: opacity 500ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+[data-animate="wipe-left"] {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 600ms cubic-bezier(0.77, 0, 0.175, 1);
+}
+[data-animate].is-in {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 0 0 0);
+}
+[data-stagger-children] > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-stagger-children].is-in > *.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-animate], [data-stagger-children] > * {
+    transform: none !important;
+    clip-path: none !important;
+    transition: opacity 200ms ease-out !important;
+  }
+}
+
+/* Rich-text content rendered from TipTap (blog posts) */
+.blog-content { color: rgba(255,255,255,0.85); line-height: 1.7; }
+.blog-content h1, .blog-content h2, .blog-content h3 {
+  color: #fff; font-family: 'Unbounded', sans-serif;
+  font-weight: 700; margin: 1.6em 0 0.6em;
+}
+.blog-content h1 { font-size: 2rem; }
+.blog-content h2 { font-size: 1.5rem; }
+.blog-content h3 { font-size: 1.2rem; }
+.blog-content p { margin: 0.8em 0; }
+.blog-content a { color: #FF6B00; text-decoration: underline; }
+.blog-content ul, .blog-content ol { margin: 0.8em 0 0.8em 1.5em; }
+.blog-content ul { list-style: disc; }
+.blog-content ol { list-style: decimal; }
+.blog-content blockquote {
+  border-left: 3px solid #FF6B00; padding-left: 1em;
+  font-style: italic; margin: 1em 0; color: rgba(255,255,255,0.7);
+}
+.blog-content img { max-width: 100%; border-radius: 8px; margin: 1em 0; }
+.blog-content code {
+  background: rgba(255,107,0,0.15); padding: 0.1em 0.4em;
+  border-radius: 4px; font-size: 0.9em;
+}

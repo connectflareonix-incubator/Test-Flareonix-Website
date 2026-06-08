@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, ArrowUp, Flame } from 'lucide-react';
-import { LOGO_URL, INSTAGRAM_URL, WHATSAPP_URL } from '@/config/constants';
+import { Instagram, ArrowUp, Flame, Linkedin } from 'lucide-react';
+import { LOGO_URL, INSTAGRAM_URL, WHATSAPP_URL, SOCIAL_LINKEDIN, FREELANCER_FORM, FOUNDER_FORM } from '@/config/constants';
 
 const Footer = () => {
   const scrollToTop = () => {
@@ -11,13 +11,14 @@ const Footer = () => {
   const quickLinks = [
     { name: 'About Us', href: '/about' },
     { name: 'Community', href: '/community' },
-    { name: 'Agency', href: '/agency' },
+    { name: 'Growth Consultation', href: '/consultation' },
     { name: 'Freelancer Hub', href: '/freelancer-hub' },
     { name: 'Incubator', href: '/incubator' },
   ];
 
   const resourceLinks = [
     { name: 'AI Tools', href: '/ai-tools' },
+    { name: 'Blog', href: '/blog' },
     { name: 'Testimonials', href: '/testimonials' },
     { name: 'FAQ', href: '/faq' },
     { name: 'Contact', href: '/contact' },
@@ -95,6 +96,30 @@ const Footer = () => {
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
               >
                 WhatsApp Channel
+              </a>
+              <a
+                href={SOCIAL_LINKEDIN}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
+              >
+                <Linkedin className="h-4 w-4" /> LinkedIn
+              </a>
+              <a
+                href={FOUNDER_FORM}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
+              >
+                Founder Application
+              </a>
+              <a
+                href={FREELANCER_FORM}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
+              >
+                Freelancer Application
               </a>
             </div>
           </div>

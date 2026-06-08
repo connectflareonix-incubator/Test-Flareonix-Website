@@ -10,6 +10,7 @@ import PhoenixDivider from '@/components/decor/PhoenixDivider';
 import SocialProofCounter from '@/components/decor/SocialProofCounter';
 import TrustBadgeRow from '@/components/decor/TrustBadgeRow';
 import EmberBadge from '@/components/decor/EmberBadge';
+import WhatWereBuilding from '@/components/home/WhatWereBuilding';
 import { useAuth } from '@/context/AuthContext';
 import { LOGO_URL } from '@/config/constants';
 import { trackPageView, trackClick } from '@/utils/analytics';
@@ -303,6 +304,8 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      <WhatWereBuilding />
 
       {/* CTA Section */}
       <section className="py-24 bg-[#050505] relative overflow-hidden">

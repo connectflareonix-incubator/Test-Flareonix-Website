@@ -10,9 +10,10 @@ const navLinks = [
   { name: 'Home', href: '/' },
   { name: 'About', href: '/about' },
   { name: 'Community', href: '/community' },
-  { name: 'Agency', href: '/agency' },
+  { name: 'Growth Consultation', href: '/consultation' },
   { name: 'Incubator', href: '/incubator' },
   { name: 'AI Tools', href: '/ai-tools' },
+  { name: 'Blog', href: '/blog' },
   { name: 'Contact', href: '/contact' },
 ];
 

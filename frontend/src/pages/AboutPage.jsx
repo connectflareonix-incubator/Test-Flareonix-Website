@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/context/AuthContext';
 import { trackPageView } from '@/utils/analytics';
+import AboutSections from '@/components/about/AboutSections';
 
 const AboutPage = () => {
   const { login } = useAuth();
@@ -267,6 +268,8 @@ const AboutPage = () => {
           </motion.div>
         </div>
       </section>
+
+      <AboutSections />
 
       <Footer />
     </main>
