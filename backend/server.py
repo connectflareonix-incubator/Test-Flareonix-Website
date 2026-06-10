@@ -761,6 +761,9 @@ app.include_router(api_router)
 # AI Tools router (Claude Sonnet 4.5 via Emergent LLM Key)
 
 # Content / Admin extended router
+from content_routes import build_content_router
+app.include_router(build_content_router(db, verify_admin, get_current_user))
+
 
 # DB init on startup
 from db_init import init_db
