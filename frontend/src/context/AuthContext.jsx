@@ -45,11 +45,12 @@ export const AuthProvider = ({ children }) => {
   }, [checkAuth]);
 
   const login = () => {
-    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-    const redirectUrl = window.location.origin + '/dashboard';
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    const redirectUri = encodeURIComponent(window.location.origin + '/auth/callback');
+    const scope = encodeURIComponent('openid email profile');
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline`;
   };
-
+  
   const logout = async () => {
     try {
       await fetch(`${API}/auth/logout`, {
