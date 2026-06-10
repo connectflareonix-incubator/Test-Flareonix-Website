@@ -304,6 +304,67 @@ async def exchange_session(request: Request, response: Response):
     return user
 
 
+@api_router.post("/auth/google/callback")
+async def google_callback(request: Request, response: Response):
+    """Handle Google OAuth callback"""
+    body = await request.json()
+    code = body.get("code")
+    redirect_uri = body.get("redirect_uri")
+    
+    if not code:
+        raise HTTPException(status_code=400, detail="code required")
+    
+    async with httpx.AsyncClient() as client:
+        token_response = await client.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": code,
+                "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
+                "client_secret": os.environ.get("GOOGLE_CLIENT_SECRET"),
+                "redirect_uri": redirect_uri,
+                "grant_type": "authorization_code"
+            }
+        )
+        if token_response.status_code != 200:
+            raise HTTPException(status_code=401, detail="Failed to exchange code")
+        tokens = token_response.json()
+        userinfo_response = await client.get(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": f"Bearer {tokens['access_token']}"}
+        )
+        if userinfo_response.status_code != 200:
+            raise HTTPException(status_code=401, detail="Failed to get user info")
+        user_info = userinfo_response.json()
+    
+    email = user_info.get("email")
+    name = user_info.get("name")
+    picture = user_info.get("picture")
+    existing_user = await db.users.find_one({"email": email}, {"_id": 0})
+    if existing_user:
+        user_id = existing_user["user_id"]
+        await db.users.update_one({"user_id": user_id}, {"$set": {"name": name, "picture": picture}})
+    else:
+        user_id = f"user_{uuid.uuid4().hex[:12]}"
+        await db.users.insert_one({
+            "user_id": user_id, "email": email, "name": name, "picture": picture,
+            "role": "admin" if email == ADMIN_EMAIL else "user",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+    session_token = f"session_{uuid.uuid4().hex}"
+    expires_at = datetime.now(timezone.utc) + timedelta(days=SESSION_DURATION_DAYS)
+    await db.user_sessions.delete_many({"user_id": user_id})
+    await db.user_sessions.insert_one({
+        "user_id": user_id, "session_token": session_token,
+        "expires_at": expires_at.isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    response.set_cookie(key="session_token", value=session_token, httponly=True,
+        secure=True, samesite="none", path="/",
+        max_age=SESSION_DURATION_DAYS * 24 * 60 * 60)
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
+    return user
+    
+
 @api_router.get("/auth/me")
 async def get_me(user: dict = Depends(get_current_user)):
     """Get current authenticated user"""
