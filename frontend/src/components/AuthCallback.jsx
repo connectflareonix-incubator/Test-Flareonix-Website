@@ -9,35 +9,34 @@ const AuthCallback = () => {
   const hasProcessed = useRef(false);
 
   useEffect(() => {
-    // Prevent double processing in StrictMode
     if (hasProcessed.current) return;
     hasProcessed.current = true;
 
     const processAuth = async () => {
-      const hash = window.location.hash;
-      const sessionIdMatch = hash.match(/session_id=([^&]+)/);
-      
-      if (!sessionIdMatch) {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+
+      if (!code) {
         navigate('/login');
         return;
       }
 
-      const sessionId = sessionIdMatch[1];
-
       try {
-        const response = await fetch(`${API}/auth/session`, {
+        const response = await fetch(`${API}/auth/google/callback`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ session_id: sessionId })
+          body: JSON.stringify({ 
+            code: code,
+            redirect_uri: window.location.origin + '/auth/callback'
+          })
         });
 
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
-          // Clear the hash and redirect
           window.history.replaceState(null, '', '/dashboard');
-          navigate('/dashboard', { state: { user: userData }, replace: true });
+          navigate('/dashboard', { replace: true });
         } else {
           navigate('/login');
         }
