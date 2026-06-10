@@ -30,8 +30,7 @@ import GrowthConsultationPage from "@/pages/GrowthConsultationPage";
 function AppRouter() {
   const location = useLocation();
   
-  // Check URL fragment for session_id - must be synchronous
-  if (location.hash?.includes('session_id=')) {
+  if (location.pathname === '/auth/callback') {
     return <AuthCallback />;
   }
 
