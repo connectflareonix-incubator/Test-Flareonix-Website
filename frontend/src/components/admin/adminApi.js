@@ -55,6 +55,13 @@ export const adminApi = {
   // settings
   getSettings: () => axios.get(`${API}/settings`).then(r => r.data),
   setSetting: (key, value) => axios.put(`${API}/admin/settings/${key}`, { value }, cfg()).then(r => r.data),
+  // events
+  listEvents: () => axios.get(`${API}/admin/events`, cfg()).then(r => r.data),
+  createEvent: (b) => axios.post(`${API}/admin/events`, b, cfg()).then(r => r.data),
+  updateEvent: (id, b) => axios.put(`${API}/admin/events/${id}`, b, cfg()).then(r => r.data),
+  deleteEvent: (id) => axios.delete(`${API}/admin/events/${id}`, cfg()).then(r => r.data),
+  listEventComments: (id) => axios.get(`${API}/admin/events/${id}/comments`, cfg()).then(r => r.data),
+  deleteEventComment: (cid) => axios.delete(`${API}/admin/events/comments/${cid}`, cfg()).then(r => r.data),
   // webhooks
   listWebhooks: () => axios.get(`${API}/admin/webhooks`, cfg()).then(r => r.data),
   updateWebhook: (id, b) => axios.put(`${API}/admin/webhooks/${id}`, b, cfg()).then(r => r.data),

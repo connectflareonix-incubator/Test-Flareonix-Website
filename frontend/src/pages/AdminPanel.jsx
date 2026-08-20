@@ -10,6 +10,7 @@ import Dashboard from '@/components/admin/sections/Dashboard';
 import Blog from '@/components/admin/sections/Blog';
 import Team from '@/components/admin/sections/Team';
 import Projects from '@/components/admin/sections/Projects';
+import Events from '@/components/admin/sections/Events';
 import Collaborations from '@/components/admin/sections/Collaborations';
 import Inbox from '@/components/admin/sections/Inbox';
 import Feedback from '@/components/admin/sections/Feedback';
@@ -76,6 +77,7 @@ const AdminPanel = () => {
         <Route path="blog" element={<Blog />} />
         <Route path="team" element={<Team />} />
         <Route path="projects" element={<Projects />} />
+        <Route path="events" element={<Events />} />
         <Route path="collaborations" element={<Collaborations />} />
         <Route path="inbox" element={<Inbox />} />
         <Route path="feedback" element={<Feedback />} />

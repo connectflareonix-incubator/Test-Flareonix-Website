@@ -4,12 +4,13 @@ import json
 from datetime import datetime
 
 class FlareonixAPITester:
-    def __init__(self, base_url="https://flareonix-rise.preview.emergentagent.com"):
+    def __init__(self, base_url="https://47159116-ed5f-40ff-a106-7dd055e9ff85.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
         self.tests_passed = 0
         self.test_results = []
+        self.created_event_id = None  # Store created event ID for cleanup
 
     def log_test(self, name, success, details=""):
         """Log test result"""
@@ -234,6 +235,396 @@ class FlareonixAPITester:
             self.log_test("Get Case Studies", False, str(e))
             return False
 
+    # ==================== EVENTS API TESTS ====================
+
+    def test_events_list(self):
+        """Test GET /api/events - public events list"""
+        try:
+            response = requests.get(f"{self.api_url}/events", timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                data = response.json()
+                details += f", Events count: {len(data)}"
+                
+                # Check if seeded FFT #001 event exists
+                fft_event = None
+                for event in data:
+                    if "FFT #001" in event.get("title", ""):
+                        fft_event = event
+                        break
+                
+                if fft_event:
+                    details += ", FFT #001 found"
+                    # Verify required fields
+                    required_fields = ["id", "title", "date", "venue", "theme", "description", 
+                                     "highlights", "registration_link", "status", "comment_count"]
+                    missing_fields = [f for f in required_fields if f not in fft_event]
+                    
+                    if missing_fields:
+                        success = False
+                        details += f", Missing fields: {missing_fields}"
+                    else:
+                        # Verify specific values for FFT #001
+                        if fft_event.get("status") != "upcoming":
+                            details += f", Warning: status is '{fft_event.get('status')}' (expected 'upcoming')"
+                        if fft_event.get("venue") != "Delhi NCR":
+                            details += f", Warning: venue is '{fft_event.get('venue')}' (expected 'Delhi NCR')"
+                        if fft_event.get("theme") != "Pay Your Own Bill":
+                            details += f", Warning: theme is '{fft_event.get('theme')}' (expected 'Pay Your Own Bill')"
+                        if fft_event.get("registration_link") != "https://nvl5h9qum1.zite.so":
+                            details += f", Warning: registration_link mismatch"
+                        
+                        # Store event ID for later tests
+                        self.fft_event_id = fft_event.get("id")
+                        details += f", Event ID: {self.fft_event_id}"
+                else:
+                    success = False
+                    details += ", FFT #001 NOT FOUND"
+            
+            self.log_test("GET /api/events (list)", success, details)
+            return success, getattr(self, 'fft_event_id', None)
+        except Exception as e:
+            self.log_test("GET /api/events (list)", False, str(e))
+            return False, None
+
+    def test_events_detail(self, event_id):
+        """Test GET /api/events/{id} - event detail"""
+        if not event_id:
+            self.log_test("GET /api/events/{id} (detail)", False, "No event ID from previous test")
+            return False
+        
+        try:
+            response = requests.get(f"{self.api_url}/events/{event_id}", timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                event = response.json()
+                details += f", Title: {event.get('title', 'N/A')}"
+                
+                # Verify all required fields are present
+                required_fields = ["id", "title", "date", "venue", "theme", "description", 
+                                 "highlights", "registration_link", "status"]
+                missing_fields = [f for f in required_fields if f not in event]
+                
+                if missing_fields:
+                    success = False
+                    details += f", Missing fields: {missing_fields}"
+            
+            self.log_test("GET /api/events/{id} (detail)", success, details)
+            return success
+        except Exception as e:
+            self.log_test("GET /api/events/{id} (detail)", False, str(e))
+            return False
+
+    def test_events_detail_404(self):
+        """Test GET /api/events/{id} with nonexistent ID - should return 404"""
+        try:
+            response = requests.get(f"{self.api_url}/events/nonexistent-id-12345", timeout=10)
+            success = response.status_code == 404
+            details = f"Status: {response.status_code} (Expected 404)"
+            
+            self.log_test("GET /api/events/nonexistent-id (404)", success, details)
+            return success
+        except Exception as e:
+            self.log_test("GET /api/events/nonexistent-id (404)", False, str(e))
+            return False
+
+    def test_events_comments_list(self, event_id):
+        """Test GET /api/events/{id}/comments - public, should return array"""
+        if not event_id:
+            self.log_test("GET /api/events/{id}/comments", False, "No event ID from previous test")
+            return False
+        
+        try:
+            response = requests.get(f"{self.api_url}/events/{event_id}/comments", timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                comments = response.json()
+                if isinstance(comments, list):
+                    details += f", Comments count: {len(comments)}"
+                else:
+                    success = False
+                    details += ", Response is not an array"
+            
+            self.log_test("GET /api/events/{id}/comments", success, details)
+            return success
+        except Exception as e:
+            self.log_test("GET /api/events/{id}/comments", False, str(e))
+            return False
+
+    def test_events_comments_post_unauthorized(self, event_id):
+        """Test POST /api/events/{id}/comments without auth - should return 401"""
+        if not event_id:
+            self.log_test("POST /api/events/{id}/comments (401)", False, "No event ID from previous test")
+            return False
+        
+        try:
+            comment_data = {
+                "content": "This is a test comment without authentication"
+            }
+            response = requests.post(f"{self.api_url}/events/{event_id}/comments", 
+                                   json=comment_data, timeout=10)
+            success = response.status_code == 401
+            details = f"Status: {response.status_code} (Expected 401 for unauthenticated request)"
+            
+            self.log_test("POST /api/events/{id}/comments (401 without auth)", success, details)
+            return success
+        except Exception as e:
+            self.log_test("POST /api/events/{id}/comments (401 without auth)", False, str(e))
+            return False
+
+    def test_admin_events_list(self, auth):
+        """Test GET /api/admin/events - requires auth"""
+        if not auth:
+            self.log_test("GET /api/admin/events", False, "No auth credentials")
+            return False
+        
+        try:
+            response = requests.get(f"{self.api_url}/admin/events", auth=auth, timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                events = response.json()
+                details += f", Events count: {len(events)}"
+            
+            self.log_test("GET /api/admin/events (with auth)", success, details)
+            return success
+        except Exception as e:
+            self.log_test("GET /api/admin/events (with auth)", False, str(e))
+            return False
+
+    def test_admin_events_list_unauthorized(self):
+        """Test GET /api/admin/events without auth - should return 401"""
+        try:
+            response = requests.get(f"{self.api_url}/admin/events", timeout=10)
+            success = response.status_code == 401
+            details = f"Status: {response.status_code} (Expected 401)"
+            
+            self.log_test("GET /api/admin/events (401 without auth)", success, details)
+            return success
+        except Exception as e:
+            self.log_test("GET /api/admin/events (401 without auth)", False, str(e))
+            return False
+
+    def test_admin_events_create(self, auth):
+        """Test POST /api/admin/events - create new event"""
+        if not auth:
+            self.log_test("POST /api/admin/events", False, "No auth credentials")
+            return False, None
+        
+        try:
+            timestamp = datetime.now().strftime("%H%M%S")
+            event_data = {
+                "title": f"Test Event QA {timestamp}",
+                "date": "Sept 2025",
+                "venue": "Test City",
+                "theme": "Testing",
+                "description": "A test event created by automated testing",
+                "highlights": ["h1", "h2"],
+                "guests": ["Speaker A"],
+                "registration_link": "https://example.com",
+                "registration_button_text": "Register",
+                "status": "upcoming",
+                "display_order": 5
+            }
+            
+            response = requests.post(f"{self.api_url}/admin/events", 
+                                   json=event_data, auth=auth, timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            event_id = None
+            if success:
+                event = response.json()
+                event_id = event.get("id")
+                if event_id:
+                    details += f", Created event ID: {event_id}"
+                    self.created_event_id = event_id
+                else:
+                    success = False
+                    details += ", No ID in response"
+            
+            self.log_test("POST /api/admin/events (create)", success, details)
+            return success, event_id
+        except Exception as e:
+            self.log_test("POST /api/admin/events (create)", False, str(e))
+            return False, None
+
+    def test_admin_events_update(self, auth, event_id):
+        """Test PUT /api/admin/events/{id} - update event"""
+        if not auth:
+            self.log_test("PUT /api/admin/events/{id}", False, "No auth credentials")
+            return False
+        
+        if not event_id:
+            self.log_test("PUT /api/admin/events/{id}", False, "No event ID from previous test")
+            return False
+        
+        try:
+            update_data = {
+                "title": "Test Event QA (Updated)",
+                "date": "Sept 2025",
+                "venue": "Test City",
+                "theme": "Testing",
+                "description": "Updated test event",
+                "highlights": ["h1", "h2"],
+                "guests": ["Speaker A"],
+                "registration_link": "https://example.com",
+                "registration_button_text": "Register",
+                "status": "ongoing",  # Changed from upcoming to ongoing
+                "display_order": 5
+            }
+            
+            response = requests.put(f"{self.api_url}/admin/events/{event_id}", 
+                                  json=update_data, auth=auth, timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                event = response.json()
+                if event.get("status") == "ongoing":
+                    details += ", Status updated to 'ongoing'"
+                else:
+                    success = False
+                    details += f", Status not updated (got '{event.get('status')}')"
+            
+            self.log_test("PUT /api/admin/events/{id} (update)", success, details)
+            return success
+        except Exception as e:
+            self.log_test("PUT /api/admin/events/{id} (update)", False, str(e))
+            return False
+
+    def test_admin_events_comments_list(self, auth, event_id):
+        """Test GET /api/admin/events/{id}/comments"""
+        if not auth:
+            self.log_test("GET /api/admin/events/{id}/comments", False, "No auth credentials")
+            return False
+        
+        if not event_id:
+            self.log_test("GET /api/admin/events/{id}/comments", False, "No event ID")
+            return False
+        
+        try:
+            response = requests.get(f"{self.api_url}/admin/events/{event_id}/comments", 
+                                  auth=auth, timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                comments = response.json()
+                if isinstance(comments, list):
+                    details += f", Comments count: {len(comments)}"
+                else:
+                    success = False
+                    details += ", Response is not an array"
+            
+            self.log_test("GET /api/admin/events/{id}/comments", success, details)
+            return success
+        except Exception as e:
+            self.log_test("GET /api/admin/events/{id}/comments", False, str(e))
+            return False
+
+    def test_admin_events_comment_delete(self, auth):
+        """Test DELETE /api/admin/events/comments/{cid}"""
+        if not auth:
+            self.log_test("DELETE /api/admin/events/comments/{cid}", False, "No auth credentials")
+            return False
+        
+        try:
+            # Test with fake comment ID (should return success:true without error)
+            fake_comment_id = "fake-comment-id-12345"
+            response = requests.delete(f"{self.api_url}/admin/events/comments/{fake_comment_id}", 
+                                     auth=auth, timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                result = response.json()
+                if result.get("success") == True:
+                    details += ", Returned success:true"
+                else:
+                    details += f", Unexpected response: {result}"
+            
+            self.log_test("DELETE /api/admin/events/comments/{cid}", success, details)
+            return success
+        except Exception as e:
+            self.log_test("DELETE /api/admin/events/comments/{cid}", False, str(e))
+            return False
+
+    def test_admin_events_delete(self, auth, event_id):
+        """Test DELETE /api/admin/events/{id} - delete test event"""
+        if not auth:
+            self.log_test("DELETE /api/admin/events/{id}", False, "No auth credentials")
+            return False
+        
+        if not event_id:
+            self.log_test("DELETE /api/admin/events/{id}", False, "No event ID from previous test")
+            return False
+        
+        try:
+            response = requests.delete(f"{self.api_url}/admin/events/{event_id}", 
+                                     auth=auth, timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                result = response.json()
+                if result.get("success") == True:
+                    details += ", Event deleted successfully"
+                    
+                    # Verify event no longer appears in public list
+                    verify_response = requests.get(f"{self.api_url}/events", timeout=10)
+                    if verify_response.status_code == 200:
+                        events = verify_response.json()
+                        event_still_exists = any(e.get("id") == event_id for e in events)
+                        if event_still_exists:
+                            success = False
+                            details += ", ERROR: Event still appears in list"
+                        else:
+                            details += ", Verified: Event removed from list"
+                else:
+                    success = False
+                    details += f", Unexpected response: {result}"
+            
+            self.log_test("DELETE /api/admin/events/{id} (delete)", success, details)
+            return success
+        except Exception as e:
+            self.log_test("DELETE /api/admin/events/{id} (delete)", False, str(e))
+            return False
+
+    def test_fft_event_still_exists(self, fft_event_id):
+        """Verify FFT #001 event still exists after all tests"""
+        if not fft_event_id:
+            self.log_test("Verify FFT #001 still exists", False, "No FFT event ID")
+            return False
+        
+        try:
+            response = requests.get(f"{self.api_url}/events/{fft_event_id}", timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                event = response.json()
+                if "FFT #001" in event.get("title", ""):
+                    details += ", FFT #001 intact"
+                else:
+                    success = False
+                    details += ", FFT #001 title changed or missing"
+            else:
+                details += ", FFT #001 NOT FOUND"
+            
+            self.log_test("Verify FFT #001 still exists", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Verify FFT #001 still exists", False, str(e))
+            return False
+
     def test_admin_dashboard(self, auth):
         """Test admin dashboard endpoint"""
         if not auth:
@@ -283,6 +674,38 @@ class FlareonixAPITester:
         self.test_reviews_approved()
         self.test_analytics_pageview()
         self.test_case_studies()
+
+        # ==================== EVENTS API TESTS ====================
+        print("\n" + "=" * 50)
+        print("🎉 Testing Events API Endpoints")
+        print("=" * 50)
+        
+        # Public events endpoints
+        events_success, fft_event_id = self.test_events_list()
+        if fft_event_id:
+            self.test_events_detail(fft_event_id)
+            self.test_events_comments_list(fft_event_id)
+            self.test_events_comments_post_unauthorized(fft_event_id)
+        
+        self.test_events_detail_404()
+        
+        # Admin events endpoints
+        if admin_success and admin_auth:
+            self.test_admin_events_list_unauthorized()
+            self.test_admin_events_list(admin_auth)
+            
+            # Create, update, and delete test event
+            create_success, test_event_id = self.test_admin_events_create(admin_auth)
+            if create_success and test_event_id:
+                self.test_admin_events_update(admin_auth, test_event_id)
+                self.test_admin_events_comments_list(admin_auth, test_event_id)
+                self.test_admin_events_delete(admin_auth, test_event_id)
+            
+            self.test_admin_events_comment_delete(admin_auth)
+        
+        # Verify FFT #001 still exists
+        if fft_event_id:
+            self.test_fft_event_still_exists(fft_event_id)
 
         return self.get_summary()
 

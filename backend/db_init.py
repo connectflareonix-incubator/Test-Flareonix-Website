@@ -50,6 +50,9 @@ async def init_db(db):
     await db.webhook_endpoints.create_index("name", unique=True)
     await db.ai_generations.create_index("user_id")
     await db.ai_generations.create_index("created_at")
+    await db.events.create_index("display_order")
+    await db.events.create_index("status")
+    await db.event_comments.create_index("event_id")
 
     # Seed site settings (upsert defaults — won't overwrite existing values)
     for k, v in DEFAULT_SETTINGS.items():
@@ -123,3 +126,33 @@ async def init_db(db):
                 "tags": [],
                 "created_at": _now(),
             })
+
+    # Seed first event — Flareonix Founders Table #001
+    fft_desc = (
+        "FFT #001 is Flareonix's first-ever closed-door founders meetup — an intimate "
+        "gathering of selected young founders from across India. No pitch decks. No "
+        "investors. Just real founders, raw conversations, and the energy of people who "
+        "are actually building."
+    )
+    if not await db.events.find_one({"title": "Flareonix Founders Table #001 (FFT #001)"}):
+        await db.events.insert_one({
+            "id": str(uuid.uuid4()),
+            "title": "Flareonix Founders Table #001 (FFT #001)",
+            "date": "To be announced",
+            "venue": "Delhi NCR",
+            "theme": "Pay Your Own Bill",
+            "description": fft_desc,
+            "short_description": fft_desc,
+            "guests": [],
+            "highlights": [
+                "Closed-door format",
+                "Selected founders only",
+                "Real conversations",
+                "Networking",
+            ],
+            "registration_link": "https://nvl5h9qum1.zite.so",
+            "registration_button_text": "Apply for FFT #001",
+            "status": "upcoming",
+            "display_order": 1,
+            "created_at": _now(),
+        })

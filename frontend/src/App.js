@@ -26,6 +26,8 @@ import TestimonialsPage from "@/pages/TestimonialsPage";
 import BlogPage from "@/pages/BlogPage";
 import BlogPostPage from "@/pages/BlogPostPage";
 import GrowthConsultationPage from "@/pages/GrowthConsultationPage";
+import EventsPage from "@/pages/EventsPage";
+import EventDetailPage from "@/pages/EventDetailPage";
 
 function AppRouter() {
   const location = useLocation();
@@ -39,6 +41,8 @@ function AppRouter() {
       <Route path="/" element={<HomePage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/community" element={<CommunityPage />} />
+      <Route path="/events" element={<EventsPage />} />
+      <Route path="/events/:id" element={<EventDetailPage />} />
       <Route path="/agency" element={<GrowthConsultationPage />} />
       <Route path="/consultation" element={<GrowthConsultationPage />} />
       <Route path="/growth-consultation" element={<GrowthConsultationPage />} />

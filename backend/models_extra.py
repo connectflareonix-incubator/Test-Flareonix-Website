@@ -210,6 +210,56 @@ class AnnouncementInput(BaseModel):
     is_dismissible: bool = True
 
 
+# ---------- Events ----------
+class Event(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    date: str = "To be announced"
+    venue: Optional[str] = ""
+    theme: Optional[str] = ""
+    description: str = ""
+    short_description: Optional[str] = ""
+    guests: List[str] = []
+    highlights: List[str] = []
+    registration_link: Optional[str] = None
+    registration_button_text: Optional[str] = "Register Now"
+    status: str = "upcoming"  # upcoming|ongoing|past
+    display_order: int = 0
+    created_at: datetime = Field(default_factory=_now)
+
+
+class EventInput(BaseModel):
+    title: str
+    date: str = "To be announced"
+    venue: Optional[str] = ""
+    theme: Optional[str] = ""
+    description: str = ""
+    short_description: Optional[str] = ""
+    guests: List[str] = []
+    highlights: List[str] = []
+    registration_link: Optional[str] = None
+    registration_button_text: Optional[str] = "Register Now"
+    status: str = "upcoming"
+    display_order: int = 0
+
+
+class EventComment(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    event_id: str
+    user_id: str
+    user_name: str
+    user_email: str
+    user_picture: Optional[str] = None
+    content: str
+    created_at: datetime = Field(default_factory=_now)
+
+
+class EventCommentCreate(BaseModel):
+    content: str = Field(..., min_length=2, max_length=2000)
+
+
 # ---------- Settings ----------
 class SettingUpdate(BaseModel):
     value: Any

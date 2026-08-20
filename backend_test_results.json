@@ -1,6 +1,6 @@
 {
-  "total_tests": 12,
-  "passed_tests": 12,
+  "total_tests": 25,
+  "passed_tests": 25,
   "success_rate": 100.0,
   "results": [
     {
@@ -11,7 +11,7 @@
     {
       "test": "Community Count Endpoint",
       "success": true,
-      "details": "Status: 200, Count: 4"
+      "details": "Status: 200, Count: 0"
     },
     {
       "test": "Community Signup Validation",
@@ -21,7 +21,7 @@
     {
       "test": "Community Signup Success",
       "success": true,
-      "details": "Status: 200, User ID: 3c2bfed5-8624-4726-8776-40b7e5209c41"
+      "details": "Status: 200, User ID: 2fc651af-ab1a-465c-a2cb-18f556538b41"
     },
     {
       "test": "Duplicate Email Signup",
@@ -46,7 +46,7 @@
     {
       "test": "Contact Form Submission",
       "success": true,
-      "details": "Status: 200, Message ID: 9cea6ae7-57d7-4fe1-92ef-5b323a877987"
+      "details": "Status: 200, Message ID: 98e9d16f-aa80-4e49-b419-00a3723a61c3"
     },
     {
       "test": "Get Approved Reviews",
@@ -62,6 +62,71 @@
       "test": "Get Case Studies",
       "success": true,
       "details": "Status: 200, Case studies count: 0"
+    },
+    {
+      "test": "GET /api/events (list)",
+      "success": true,
+      "details": "Status: 200, Events count: 1, FFT #001 found, Event ID: bce0f551-a9a3-45ea-ab32-c6a031816266"
+    },
+    {
+      "test": "GET /api/events/{id} (detail)",
+      "success": true,
+      "details": "Status: 200, Title: Flareonix Founders Table #001 (FFT #001)"
+    },
+    {
+      "test": "GET /api/events/{id}/comments",
+      "success": true,
+      "details": "Status: 200, Comments count: 0"
+    },
+    {
+      "test": "POST /api/events/{id}/comments (401 without auth)",
+      "success": true,
+      "details": "Status: 401 (Expected 401 for unauthenticated request)"
+    },
+    {
+      "test": "GET /api/events/nonexistent-id (404)",
+      "success": true,
+      "details": "Status: 404 (Expected 404)"
+    },
+    {
+      "test": "GET /api/admin/events (401 without auth)",
+      "success": true,
+      "details": "Status: 401 (Expected 401)"
+    },
+    {
+      "test": "GET /api/admin/events (with auth)",
+      "success": true,
+      "details": "Status: 200, Events count: 1"
+    },
+    {
+      "test": "POST /api/admin/events (create)",
+      "success": true,
+      "details": "Status: 200, Created event ID: 7f88be91-ffc8-4272-9b4e-8bb685587693"
+    },
+    {
+      "test": "PUT /api/admin/events/{id} (update)",
+      "success": true,
+      "details": "Status: 200, Status updated to 'ongoing'"
+    },
+    {
+      "test": "GET /api/admin/events/{id}/comments",
+      "success": true,
+      "details": "Status: 200, Comments count: 0"
+    },
+    {
+      "test": "DELETE /api/admin/events/{id} (delete)",
+      "success": true,
+      "details": "Status: 200, Event deleted successfully, Verified: Event removed from list"
+    },
+    {
+      "test": "DELETE /api/admin/events/comments/{cid}",
+      "success": true,
+      "details": "Status: 200, Returned success:true"
+    },
+    {
+      "test": "Verify FFT #001 still exists",
+      "success": true,
+      "details": "Status: 200, FFT #001 intact"
     }
   ]
 }

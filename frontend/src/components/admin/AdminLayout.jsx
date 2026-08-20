@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Users as TeamIcon, Briefcase, Handshake, Inbox,
-  Star, UserCog, Megaphone, Settings, LogOut, Menu, X,
+  Star, UserCog, Megaphone, Settings, LogOut, Menu, X, CalendarDays,
 } from 'lucide-react';
 import { adminClear } from './adminAuth';
 
@@ -11,6 +11,7 @@ const links = [
   { to: '/admin/blog', label: 'Blog', icon: FileText },
   { to: '/admin/team', label: 'Team Gallery', icon: TeamIcon },
   { to: '/admin/projects', label: 'Projects', icon: Briefcase },
+  { to: '/admin/events', label: 'Events', icon: CalendarDays },
   { to: '/admin/collaborations', label: 'Collaborations', icon: Handshake },
   { to: '/admin/inbox', label: 'Inbox', icon: Inbox },
   { to: '/admin/feedback', label: 'Feedback & Reviews', icon: Star },

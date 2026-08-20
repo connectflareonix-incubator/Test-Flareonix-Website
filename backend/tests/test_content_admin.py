@@ -11,7 +11,7 @@ from requests.auth import HTTPBasicAuth
 from pymongo import MongoClient
 from datetime import datetime, timezone, timedelta
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://flareonix-rise.preview.emergentagent.com").rstrip("/")
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://gatherings-1.preview.emergentagent.com").rstrip("/")
 API = f"{BASE_URL}/api"
 ADMIN_EMAIL = "connectflareonix@gmail.com"
 ADMIN_PASSWORD = "Flareonix@admin02"

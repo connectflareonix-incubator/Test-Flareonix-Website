@@ -764,6 +764,10 @@ app.include_router(api_router)
 from content_routes import build_content_router
 app.include_router(build_content_router(db, verify_admin, get_current_user))
 
+# Events router (public + admin)
+from events_routes import build_events_router
+app.include_router(build_events_router(db, verify_admin, get_current_user))
+
 
 # DB init on startup
 from db_init import init_db

@@ -101,3 +101,87 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Add a complete Events section to the Flareonix website: public events list & detail pages, first event FFT #001, comments (login-required), navigation link, backend events collection + API endpoints, and admin panel Events management with comment moderation."
+
+backend:
+  - task: "Events public API (GET /api/events list, GET /api/events/{id} detail)"
+    implemented: true
+    working: true
+    file: "backend/events_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "New events_routes.py with public list + detail. list attaches comment_count. FFT #001 seeded via db_init.py. Verified via curl that /api/events returns seeded event."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ PASSED - GET /api/events returns list with seeded FFT #001 event (ID: bce0f551-a9a3-45ea-ab32-c6a031816266). All required fields present: id, title, date, venue, theme, description, highlights, registration_link, status, comment_count. FFT #001 has correct values: status='upcoming', venue='Delhi NCR', theme='Pay Your Own Bill', registration_link='https://nvl5h9qum1.zite.so'. GET /api/events/{id} returns full event detail correctly. GET /api/events/nonexistent-id returns 404 as expected."
+
+  - task: "Event comments (GET /api/events/{id}/comments public, POST /api/events/{id}/comments login-required)"
+    implemented: true
+    working: true
+    file: "backend/events_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "POST requires get_current_user (session cookie/Bearer). GET is public. Stored in event_comments collection with user_name/email/picture."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ PASSED - GET /api/events/{id}/comments returns empty array (public access working). POST /api/events/{id}/comments correctly returns 401 when called without authentication (no session cookie or Bearer token), confirming auth-gating is working as expected."
+
+  - task: "Admin events CRUD + comment moderation (HTTP Basic auth)"
+    implemented: true
+    working: true
+    file: "backend/events_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "GET/POST/PUT/DELETE /api/admin/events, GET /api/admin/events/{id}/comments, DELETE /api/admin/events/comments/{cid}. All use verify_admin (connectflareonix@gmail.com / Flareonix@admin02). Deleting an event cascades comment deletion."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ PASSED - All admin endpoints working correctly with HTTP Basic Auth (connectflareonix@gmail.com / Flareonix@admin02). GET /api/admin/events returns 401 without auth, 200 with auth. POST /api/admin/events successfully created test event with all fields. PUT /api/admin/events/{id} successfully updated event status from 'upcoming' to 'ongoing'. DELETE /api/admin/events/{id} successfully deleted test event and verified removal from public list. GET /api/admin/events/{id}/comments returns array. DELETE /api/admin/events/comments/{cid} returns success:true. FFT #001 seeded event remains intact after all tests."
+
+frontend:
+  - task: "Events list, detail pages, comments UI, nav link, admin Events section"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/EventsPage.jsx, EventDetailPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Pages render verified via screenshot. Not yet tested by automated agent (awaiting user permission)."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Events public API (GET /api/events list, GET /api/events/{id} detail)"
+    - "Event comments (GET /api/events/{id}/comments public, POST /api/events/{id}/comments login-required)"
+    - "Admin events CRUD + comment moderation (HTTP Basic auth)"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    -agent: "main"
+    -message: "Events backend implemented and TESTED — 25/25 tests passed (100%). All public + admin endpoints working, auth-gating correct, FFT #001 seeded and intact."
+    -agent: "testing"
+    -message: "25/25 backend tests passed. Events public API, comments auth-gating (401 without session), and admin CRUD + comment moderation all working. FFT #001 seeded event verified intact."
+    -agent: "testing"
+    -message: "✅ ALL EVENTS BACKEND TESTS PASSED (25/25 tests, 100% success rate). Comprehensive testing completed for all Events API endpoints. Public endpoints: GET /api/events (list with comment_count), GET /api/events/{id} (detail + 404 for invalid ID), GET /api/events/{id}/comments (public array), POST /api/events/{id}/comments (correctly returns 401 without auth). Admin endpoints with HTTP Basic Auth: GET /api/admin/events (401 without auth, 200 with auth), POST /api/admin/events (create), PUT /api/admin/events/{id} (update), DELETE /api/admin/events/{id} (delete + cascade), GET /api/admin/events/{id}/comments, DELETE /api/admin/events/comments/{cid}. Seeded FFT #001 event verified with all required fields and correct values. Test event created, updated, and deleted successfully. No issues found."
