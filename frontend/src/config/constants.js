@@ -1,5 +1,4 @@
 // Flareonix Global Constants — single source of truth for the entire app
-// Most are overridden by /api/settings (admin-editable). These act as defaults.
 
 // Brand
 export const BRAND_NAME = "Flareonix";
@@ -21,8 +20,10 @@ export const SOCIAL_INSTAGRAM_HANDLE = "@flare.onix";
 export const SOCIAL_LINKEDIN = "https://www.linkedin.com/company/flareonix-incubator";
 export const SOCIAL_LINKEDIN_LABEL = "Flareonix Incubator";
 export const WHATSAPP_COMMUNITY = "https://whatsapp.com/channel/0029VbBvp58F6sn3qA6mK501";
-export const WHATSAPP_URL = WHATSAPP_COMMUNITY; // back-compat
-export const INSTAGRAM_URL = SOCIAL_INSTAGRAM; // back-compat
+export const WHATSAPP_FOUNDERS = "https://chat.whatsapp.com/Flp6owa0hvS7Y8LnJ1VFsK?mode=gi_t";
+export const WHATSAPP_FREELANCERS = "https://chat.whatsapp.com/EXnXmiNncJPETuUgk5LPOI?mode=gi_t";
+export const WHATSAPP_URL = WHATSAPP_COMMUNITY;
+export const INSTAGRAM_URL = SOCIAL_INSTAGRAM;
 
 // Forms / scheduling
 export const CALENDLY_LINK = "https://calendly.com/connectflareonix";
@@ -30,7 +31,8 @@ export const FREELANCER_FORM =
   "https://docs.google.com/forms/d/e/1FAIpQLSdeZDQDdtFPKtWM9FaPYeZNWz8m48Bj9-IUQqt70oQkE2N8Sw/viewform";
 export const FOUNDER_FORM =
   "https://docs.google.com/forms/d/e/1FAIpQLSf5EK_CDUtKwZFo1s9z6MeM-XIoeNfegqdODcNbCGSlRa4Lcw/viewform";
-export const GOOGLE_FORM_URL = FOUNDER_FORM; // back-compat
+export const GOOGLE_FORM_URL = FOUNDER_FORM;
+export const FFT001_FORM = "https://nvl5h9qum1.zite.so";
 
 // Logo
 export const LOGO_URL =
@@ -64,5 +66,6 @@ export const NAV_LINKS = [
   { name: "Freelancer Hub", href: "/freelancer-hub" },
   { name: "Incubator", href: "/incubator" },
   { name: "AI Tools", href: "/ai-tools" },
+  { name: "Events", href: "/events" },
   { name: "Contact", href: "/contact" },
 ];
