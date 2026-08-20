@@ -14,7 +14,7 @@ class SparkEngine {
     this.particles = [];
     this.cursor = { x: -9999, y: -9999, vx: 0, vy: 0, px: -9999, py: -9999, speed: 0 };
     this.ambientTarget = 40;
-    this.cursorSparksMax = 20;
+    this.cursorSparksMax = 6;
     this.fps = 60;
     this.frameTimes = [];
     this.lastFrame = performance.now();
@@ -121,7 +121,7 @@ class SparkEngine {
         vy: Math.sin(angle) * speed - 0.8,
         size: 3 + Math.random() * 3,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        life: 40 + Math.random() * 30,
+        life: 30 + Math.random() * 10,
         age: 0,
         maxOpacity: 0.9,
       });
@@ -223,9 +223,9 @@ class SparkEngine {
 
     // Spawn cursor sparks based on speed
     const s = this.cursor.speed;
-    let n = 4;
+    let n = 2;
     if (s > 15) n = this.cursorSparksMax;
-    else if (s > 5) n = Math.min(this.cursorSparksMax, Math.round(4 + (s - 5) * 0.8));
+    else if (s > 5) n = Math.min(this.cursorSparksMax, Math.round(2 + (s - 5) * 0.4));
     if (this.cursor.x > -9000) this.spawnCursorSparks(Math.min(n, this.cursorSparksMax));
 
     // Hover sparks
