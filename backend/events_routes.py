@@ -2,7 +2,10 @@
 moderation. Follows the same build-router pattern as content_routes.py."""
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timezone
-from models_extra import Event, EventInput, EventComment, EventCommentCreate
+from models_extra import (
+    Event, EventInput, EventComment, EventCommentCreate,
+    WaitlistEntry, WaitlistEntryCreate,
+)
 
 
 def _now():
@@ -86,6 +89,36 @@ def build_events_router(db, verify_admin, get_current_user):
             await db.events.update_one({"id": event_id}, {"$set": {"spots_filled": filled}})
         return {"spots_filled": filled, "capacity": capacity}
 
+    # ============ WAITLIST ============
+
+    @router.get("/events/{event_id}/waitlist-count")
+    async def waitlist_count(event_id: str):
+        count = await db.event_waitlist.count_documents({"event_id": event_id})
+        return {"waitlist_count": count}
+
+    @router.post("/events/{event_id}/waitlist")
+    async def join_waitlist(event_id: str, inp: WaitlistEntryCreate):
+        """Public: capture an email for an event's waitlist (e.g. when full)."""
+        ev = await db.events.find_one({"id": event_id}, {"_id": 0})
+        if not ev:
+            raise HTTPException(404, "Event not found")
+        email = (inp.email or "").strip().lower()
+        if "@" not in email or "." not in email:
+            raise HTTPException(400, "Please enter a valid email address")
+        existing = await db.event_waitlist.find_one(
+            {"event_id": event_id, "email": email}, {"_id": 0}
+        )
+        if existing:
+            count = await db.event_waitlist.count_documents({"event_id": event_id})
+            return {"success": True, "already": True, "waitlist_count": count}
+        entry = WaitlistEntry(
+            event_id=event_id, name=(inp.name or "").strip(), email=email
+        ).model_dump()
+        entry["created_at"] = entry["created_at"].isoformat()
+        await db.event_waitlist.insert_one(entry)
+        count = await db.event_waitlist.count_documents({"event_id": event_id})
+        return {"success": True, "already": False, "waitlist_count": count}
+
     # ============ ADMIN ============
 
     @router.get("/admin/events")
@@ -109,6 +142,7 @@ def build_events_router(db, verify_admin, get_current_user):
     async def admin_delete_event(event_id: str, _: str = Depends(verify_admin)):
         await db.events.delete_one({"id": event_id})
         await db.event_comments.delete_many({"event_id": event_id})
+        await db.event_waitlist.delete_many({"event_id": event_id})
         return {"success": True}
 
     @router.get("/admin/events/{event_id}/comments")
@@ -122,6 +156,17 @@ def build_events_router(db, verify_admin, get_current_user):
         # Cascade delete any replies to this comment as well
         await db.event_comments.delete_one({"id": comment_id})
         await db.event_comments.delete_many({"parent_id": comment_id})
+        return {"success": True}
+
+    @router.get("/admin/events/{event_id}/waitlist")
+    async def admin_list_waitlist(event_id: str, _: str = Depends(verify_admin)):
+        return await db.event_waitlist.find(
+            {"event_id": event_id}, {"_id": 0}
+        ).sort("created_at", -1).to_list(5000)
+
+    @router.delete("/admin/events/waitlist/{entry_id}")
+    async def admin_delete_waitlist(entry_id: str, _: str = Depends(verify_admin)):
+        await db.event_waitlist.delete_one({"id": entry_id})
         return {"success": True}
 
     return router

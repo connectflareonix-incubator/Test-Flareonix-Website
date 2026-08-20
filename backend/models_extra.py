@@ -268,6 +268,20 @@ class EventCommentCreate(BaseModel):
     parent_id: Optional[str] = None
 
 
+class WaitlistEntry(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    event_id: str
+    name: Optional[str] = ""
+    email: str
+    created_at: datetime = Field(default_factory=_now)
+
+
+class WaitlistEntryCreate(BaseModel):
+    name: Optional[str] = ""
+    email: str = Field(..., min_length=3, max_length=200)
+
+
 # ---------- Settings ----------
 class SettingUpdate(BaseModel):
     value: Any

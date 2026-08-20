@@ -62,6 +62,8 @@ export const adminApi = {
   deleteEvent: (id) => axios.delete(`${API}/admin/events/${id}`, cfg()).then(r => r.data),
   listEventComments: (id) => axios.get(`${API}/admin/events/${id}/comments`, cfg()).then(r => r.data),
   deleteEventComment: (cid) => axios.delete(`${API}/admin/events/comments/${cid}`, cfg()).then(r => r.data),
+  listEventWaitlist: (id) => axios.get(`${API}/admin/events/${id}/waitlist`, cfg()).then(r => r.data),
+  deleteEventWaitlist: (wid) => axios.delete(`${API}/admin/events/waitlist/${wid}`, cfg()).then(r => r.data),
   // webhooks
   listWebhooks: () => axios.get(`${API}/admin/webhooks`, cfg()).then(r => r.data),
   updateWebhook: (id, b) => axios.put(`${API}/admin/webhooks/${id}`, b, cfg()).then(r => r.data),

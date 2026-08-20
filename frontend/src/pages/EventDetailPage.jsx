@@ -64,6 +64,11 @@ const EventDetailPage = () => {
   const [replyText, setReplyText] = useState('');
   const [replySubmitting, setReplySubmitting] = useState(false);
   const [seats, setSeats] = useState({ capacity: 0, filled: 0 });
+  const [waitlistCount, setWaitlistCount] = useState(0);
+  const [waitName, setWaitName] = useState('');
+  const [waitEmail, setWaitEmail] = useState('');
+  const [waitSubmitting, setWaitSubmitting] = useState(false);
+  const [waitJoined, setWaitJoined] = useState(false);
 
   const loadComments = () => {
     axios.get(`${API}/events/${id}/comments`).then((r) => setComments(r.data || []));
@@ -77,7 +82,28 @@ const EventDetailPage = () => {
       })
       .catch(() => { toast.error('Event not found'); nav('/events'); });
     loadComments();
+    axios.get(`${API}/events/${id}/waitlist-count`)
+      .then((r) => setWaitlistCount(r.data.waitlist_count || 0))
+      .catch(() => {});
   }, [id]); // eslint-disable-line
+
+  const submitWaitlist = async (e) => {
+    e.preventDefault();
+    if (!waitEmail.includes('@') || !waitEmail.includes('.')) {
+      toast.error('Enter a valid email');
+      return;
+    }
+    setWaitSubmitting(true);
+    try {
+      const r = await axios.post(`${API}/events/${id}/waitlist`, { name: waitName, email: waitEmail });
+      setWaitlistCount(r.data.waitlist_count || 0);
+      setWaitJoined(true);
+      toast.success(r.data.already ? "You're already on the waitlist" : "You're on the waitlist!");
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to join waitlist');
+    }
+    setWaitSubmitting(false);
+  };
 
   const postComment = (content, parentId) =>
     axios.post(`${API}/events/${id}/comments`, { content, parent_id: parentId || null }, { withCredentials: true });
@@ -145,6 +171,7 @@ const EventDetailPage = () => {
   const pct = cap ? Math.min(100, Math.round((filled / cap) * 100)) : 0;
   const left = cap ? Math.max(0, cap - filled) : 0;
   const urgent = cap ? left <= Math.max(1, Math.round(cap * 0.25)) : false;
+  const isFull = cap > 0 && left === 0;
 
   return (
     <main className="min-h-screen bg-[#050505]">
@@ -249,8 +276,48 @@ const EventDetailPage = () => {
               </div>
             )}
 
-            {/* Registration CTA */}
-            {event.registration_link && (
+            {/* Registration CTA / Waitlist */}
+            {isFull ? (
+              <div className="mb-12 p-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent" data-testid="event-waitlist">
+                <div className="text-center mb-5">
+                  <h3 className="font-heading text-xl font-bold text-white mb-2">This event is fully booked</h3>
+                  <p className="text-sm text-white/60">
+                    Join the waitlist and we&apos;ll reach out the moment a seat opens up.
+                    {waitlistCount > 0 && ` ${waitlistCount} ${waitlistCount === 1 ? 'founder is' : 'founders are'} already waiting.`}
+                  </p>
+                </div>
+                {waitJoined ? (
+                  <div className="text-center py-3" data-testid="event-waitlist-success">
+                    <CheckCircle2 className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <p className="text-white font-semibold">You&apos;re on the waitlist!</p>
+                    <p className="text-sm text-white/50 mt-1">We&apos;ll be in touch if a spot frees up.</p>
+                  </div>
+                ) : (
+                  <form onSubmit={submitWaitlist} className="max-w-md mx-auto space-y-3" data-testid="event-waitlist-form">
+                    <input
+                      type="text"
+                      value={waitName}
+                      onChange={(e) => setWaitName(e.target.value)}
+                      placeholder="Your name (optional)"
+                      className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-white/30 focus:border-primary outline-none"
+                      data-testid="event-waitlist-name"
+                    />
+                    <input
+                      type="email"
+                      value={waitEmail}
+                      onChange={(e) => setWaitEmail(e.target.value)}
+                      placeholder="you@email.com"
+                      required
+                      className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-white/30 focus:border-primary outline-none"
+                      data-testid="event-waitlist-email"
+                    />
+                    <Button type="submit" disabled={waitSubmitting} className="w-full bg-primary text-white hover:bg-primary/90 rounded-full py-6 text-base font-semibold hover-glow" data-testid="event-waitlist-submit">
+                      {waitSubmitting ? 'Joining…' : 'Join the Waitlist'}
+                    </Button>
+                  </form>
+                )}
+              </div>
+            ) : event.registration_link ? (
               <div className="mb-12 p-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent text-center">
                 <h3 className="font-heading text-xl font-bold text-white mb-2">Want in?</h3>
                 <p className="text-sm text-white/60 mb-4">Seats are limited. Secure your spot now.</p>
@@ -261,7 +328,7 @@ const EventDetailPage = () => {
                   </Button>
                 </a>
               </div>
-            )}
+            ) : null}
 
             <hr className="my-10 border-white/10" />
 

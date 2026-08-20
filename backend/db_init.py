@@ -53,6 +53,7 @@ async def init_db(db):
     await db.events.create_index("display_order")
     await db.events.create_index("status")
     await db.event_comments.create_index("event_id")
+    await db.event_waitlist.create_index("event_id")
 
     # Seed site settings (upsert defaults — won't overwrite existing values)
     for k, v in DEFAULT_SETTINGS.items():

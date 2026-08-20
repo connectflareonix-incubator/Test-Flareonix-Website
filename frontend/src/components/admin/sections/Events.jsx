@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, MessageSquare, ArrowLeft } from 'lucide-react';
+import { Plus, Edit2, Trash2, MessageSquare, ArrowLeft, ListChecks } from 'lucide-react';
 import { adminApi } from '../adminApi';
 import { Card, SectionHeader, PrimaryButton, GhostButton, TextInput, Textarea, Select, Loader, Empty, Pill } from '../ui';
 import { readFileAsDataURL } from '../fileUtil';
@@ -19,6 +19,8 @@ const Events = () => {
   const [form, setForm] = useState(empty);
   const [managing, setManaging] = useState(null); // event object for comments
   const [comments, setComments] = useState([]);
+  const [managingWaitlist, setManagingWaitlist] = useState(null); // event object for waitlist
+  const [waitlist, setWaitlist] = useState([]);
 
   const load = async () => setItems(await adminApi.listEvents());
   useEffect(() => { load(); }, []);
@@ -55,6 +57,25 @@ const Events = () => {
     catch (err) { toast.error(err.message); }
   };
 
+  const openWaitlist = async (e) => {
+    setManagingWaitlist(e);
+    setWaitlist(await adminApi.listEventWaitlist(e.id));
+  };
+
+  const delWaitlistEntry = async (wid) => {
+    if (window.confirm('Remove this waitlist entry?')) {
+      await adminApi.deleteEventWaitlist(wid);
+      setWaitlist(await adminApi.listEventWaitlist(managingWaitlist.id));
+      toast.success('Removed');
+    }
+  };
+
+  const copyEmails = () => {
+    const emails = waitlist.map((w) => w.email).join(', ');
+    navigator.clipboard?.writeText(emails);
+    toast.success('Emails copied');
+  };
+
   const delComment = async (cid) => {
     if (window.confirm('Delete this comment?')) {
       await adminApi.deleteEventComment(cid);
@@ -64,6 +85,36 @@ const Events = () => {
   };
 
   if (items === null) return <Loader />;
+
+  // ---------- Waitlist view ----------
+  if (managingWaitlist) return (
+    <div data-testid="admin-events-waitlist">
+      <SectionHeader
+        title={`Waitlist — ${managingWaitlist.title}`}
+        actions={[
+          waitlist.length > 0 ? <GhostButton key="c" onClick={copyEmails}>Copy emails</GhostButton> : null,
+          <GhostButton key="b" onClick={() => setManagingWaitlist(null)}><ArrowLeft className="inline h-4 w-4 mr-1" /> Back</GhostButton>,
+        ].filter(Boolean)}
+      />
+      <Card>
+        {waitlist.length === 0 ? <Empty>No one on the waitlist yet</Empty> : (
+          <table className="w-full text-sm">
+            <thead className="text-left text-white/60"><tr><th className="p-2">Name</th><th className="p-2">Email</th><th className="p-2">Joined</th><th></th></tr></thead>
+            <tbody>{waitlist.map((w) => (
+              <tr key={w.id} className="border-t border-white/5">
+                <td className="p-2">{w.name || '—'}</td>
+                <td className="p-2 text-white/80">{w.email}</td>
+                <td className="p-2 text-white/50">{w.created_at ? new Date(w.created_at).toLocaleDateString() : '—'}</td>
+                <td className="p-2 text-right">
+                  <button onClick={() => delWaitlistEntry(w.id)} className="p-1.5 hover:bg-red-500/10 text-red-400 rounded"><Trash2 className="h-4 w-4" /></button>
+                </td>
+              </tr>
+            ))}</tbody>
+          </table>
+        )}
+      </Card>
+    </div>
+  );
 
   // ---------- Comments moderation view ----------
   if (managing) return (
@@ -155,6 +206,7 @@ const Events = () => {
                 <td className="p-2 text-white/70">{e.venue || '—'}</td>
                 <td className="p-2 text-right whitespace-nowrap">
                   <button onClick={() => openComments(e)} title="Moderate comments" className="p-1.5 hover:bg-white/10 rounded mr-1"><MessageSquare className="h-4 w-4" /></button>
+                  <button onClick={() => openWaitlist(e)} title="View waitlist" className="p-1.5 hover:bg-white/10 rounded mr-1"><ListChecks className="h-4 w-4" /></button>
                   <button onClick={() => openEdit(e)} title="Edit" className="p-1.5 hover:bg-white/10 rounded mr-1"><Edit2 className="h-4 w-4" /></button>
                   <button onClick={() => del(e.id)} title="Delete" className="p-1.5 hover:bg-red-500/10 text-red-400 rounded"><Trash2 className="h-4 w-4" /></button>
                 </td>

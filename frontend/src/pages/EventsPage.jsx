@@ -116,7 +116,7 @@ const EventsPage = () => {
                             <Users className="h-3.5 w-3.5" /> {filled}/{cap} seats
                           </span>
                           <span className={left <= Math.max(1, cap * 0.25) ? 'text-primary font-semibold' : 'text-white/40'}>
-                            {left === 0 ? 'Fully booked' : `Only ${left} left`}
+                            {left === 0 ? 'Waitlist open' : `Only ${left} left`}
                           </span>
                         </div>
                         <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
