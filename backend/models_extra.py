@@ -220,10 +220,13 @@ class Event(BaseModel):
     theme: Optional[str] = ""
     description: str = ""
     short_description: Optional[str] = ""
+    cover_image_url: Optional[str] = None
     guests: List[str] = []
     highlights: List[str] = []
     registration_link: Optional[str] = None
     registration_button_text: Optional[str] = "Register Now"
+    capacity: int = 0            # 0 = seats counter hidden
+    spots_filled: int = 0
     status: str = "upcoming"  # upcoming|ongoing|past
     display_order: int = 0
     created_at: datetime = Field(default_factory=_now)
@@ -236,10 +239,13 @@ class EventInput(BaseModel):
     theme: Optional[str] = ""
     description: str = ""
     short_description: Optional[str] = ""
+    cover_image_url: Optional[str] = None
     guests: List[str] = []
     highlights: List[str] = []
     registration_link: Optional[str] = None
     registration_button_text: Optional[str] = "Register Now"
+    capacity: int = 0
+    spots_filled: int = 0
     status: str = "upcoming"
     display_order: int = 0
 
@@ -248,6 +254,7 @@ class EventComment(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     event_id: str
+    parent_id: Optional[str] = None
     user_id: str
     user_name: str
     user_email: str
@@ -258,6 +265,7 @@ class EventComment(BaseModel):
 
 class EventCommentCreate(BaseModel):
     content: str = Field(..., min_length=2, max_length=2000)
+    parent_id: Optional[str] = None
 
 
 # ---------- Settings ----------

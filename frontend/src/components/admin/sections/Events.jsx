@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, MessageSquare, ArrowLeft } from 'lucide-react';
 import { adminApi } from '../adminApi';
 import { Card, SectionHeader, PrimaryButton, GhostButton, TextInput, Textarea, Select, Loader, Empty, Pill } from '../ui';
+import { readFileAsDataURL } from '../fileUtil';
 import { toast } from 'sonner';
 
 const empty = {
   title: '', date: 'To be announced', venue: '', theme: '', description: '',
-  short_description: '', guests: [], highlights: [], registration_link: '',
-  registration_button_text: 'Register Now', status: 'upcoming', display_order: 0,
+  short_description: '', cover_image_url: '', guests: [], highlights: [], registration_link: '',
+  registration_button_text: 'Register Now', capacity: 0, spots_filled: 0, status: 'upcoming', display_order: 0,
 };
 
 const statusColor = (s) => (s === 'ongoing' ? 'green' : s === 'past' ? 'gray' : 'orange');
@@ -48,6 +49,12 @@ const Events = () => {
     setComments(await adminApi.listEventComments(e.id));
   };
 
+  const onCover = async (e) => {
+    const f = e.target.files?.[0]; if (!f) return;
+    try { const url = await readFileAsDataURL(f); setForm((s) => ({ ...s, cover_image_url: url })); }
+    catch (err) { toast.error(err.message); }
+  };
+
   const delComment = async (cid) => {
     if (window.confirm('Delete this comment?')) {
       await adminApi.deleteEventComment(cid);
@@ -71,7 +78,8 @@ const Events = () => {
             {comments.map((c) => (
               <div key={c.id} className="flex items-start justify-between gap-3 p-3 rounded-lg bg-black/30 border border-white/5">
                 <div className="min-w-0">
-                  <p className="text-sm text-white font-semibold">
+                  <p className="text-sm text-white font-semibold flex items-center gap-2">
+                    {c.parent_id && <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/50">↳ reply</span>}
                     {c.user_name} <span className="text-white/40 font-normal text-xs">· {c.user_email}</span>
                   </p>
                   <p className="text-sm text-white/70 mt-1 whitespace-pre-line break-words">{c.content}</p>
@@ -103,6 +111,16 @@ const Events = () => {
           <div><label className="text-xs text-white/60">Status</label><Select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}><option value="upcoming">Upcoming</option><option value="ongoing">Ongoing</option><option value="past">Past</option></Select></div>
         </div>
         <div><label className="text-xs text-white/60">Short description (card)</label><Textarea rows={2} value={form.short_description || ''} onChange={(e) => setForm({ ...form, short_description: e.target.value })} /></div>
+        <div>
+          <label className="text-xs text-white/60">Cover / banner image</label>
+          <input type="file" accept="image/*" onChange={onCover} className="text-sm block mt-1" data-testid="event-cover-input" />
+          {form.cover_image_url && (
+            <div className="mt-2 flex items-start gap-2">
+              <img src={form.cover_image_url} alt="" className="h-24 w-40 rounded-lg object-cover border border-white/10" />
+              <button type="button" onClick={() => setForm({ ...form, cover_image_url: '' })} className="text-xs text-red-400 hover:underline">Remove</button>
+            </div>
+          )}
+        </div>
         <div><label className="text-xs text-white/60">Full description</label><Textarea rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
         <div><label className="text-xs text-white/60">Guests / Speakers (comma separated)</label><TextInput value={(form.guests || []).join(', ')} onChange={(e) => setForm({ ...form, guests: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })} /></div>
         <div><label className="text-xs text-white/60">Highlights (comma separated)</label><TextInput value={(form.highlights || []).join(', ')} onChange={(e) => setForm({ ...form, highlights: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })} /></div>
@@ -110,7 +128,12 @@ const Events = () => {
           <div><label className="text-xs text-white/60">Registration link</label><TextInput value={form.registration_link || ''} onChange={(e) => setForm({ ...form, registration_link: e.target.value })} /></div>
           <div><label className="text-xs text-white/60">Registration button text</label><TextInput value={form.registration_button_text || ''} onChange={(e) => setForm({ ...form, registration_button_text: e.target.value })} /></div>
         </div>
-        <div><label className="text-xs text-white/60">Display order</label><TextInput type="number" value={form.display_order} onChange={(e) => setForm({ ...form, display_order: Number(e.target.value) || 0 })} /></div>
+        <div className="grid md:grid-cols-3 gap-3">
+          <div><label className="text-xs text-white/60">Total seats (capacity)</label><TextInput type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) || 0 })} data-testid="event-capacity" /></div>
+          <div><label className="text-xs text-white/60">Seats filled</label><TextInput type="number" value={form.spots_filled} onChange={(e) => setForm({ ...form, spots_filled: Number(e.target.value) || 0 })} data-testid="event-spots-filled" /></div>
+          <div><label className="text-xs text-white/60">Display order</label><TextInput type="number" value={form.display_order} onChange={(e) => setForm({ ...form, display_order: Number(e.target.value) || 0 })} /></div>
+        </div>
+        <p className="text-xs text-white/30">Set capacity above 0 to show the “spots filling up” counter. Leave at 0 to hide it.</p>
         <PrimaryButton onClick={save}>Save</PrimaryButton>
       </Card>
     </div>

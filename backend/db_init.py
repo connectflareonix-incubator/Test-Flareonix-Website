@@ -134,15 +134,23 @@ async def init_db(db):
         "investors. Just real founders, raw conversations, and the energy of people who "
         "are actually building."
     )
-    if not await db.events.find_one({"title": "Flareonix Founders Table #001 (FFT #001)"}):
+    fft_cover = (
+        "https://images.unsplash.com/photo-1631701731910-2c6c6c1545f2?crop=entropy&cs=srgb"
+        "&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwzfHxyb3VuZHRhYmxlJTIwZGlzY3Vzc2lvbnxlbnww"
+        "fHx8YmxhY2t8MTc4NzIyMTE3N3ww&ixlib=rb-4.1.0&q=85"
+    )
+    fft_title = "Flareonix Founders Table #001 (FFT #001)"
+    existing_fft = await db.events.find_one({"title": fft_title})
+    if not existing_fft:
         await db.events.insert_one({
             "id": str(uuid.uuid4()),
-            "title": "Flareonix Founders Table #001 (FFT #001)",
+            "title": fft_title,
             "date": "To be announced",
             "venue": "Delhi NCR",
             "theme": "Pay Your Own Bill",
             "description": fft_desc,
             "short_description": fft_desc,
+            "cover_image_url": fft_cover,
             "guests": [],
             "highlights": [
                 "Closed-door format",
@@ -152,7 +160,31 @@ async def init_db(db):
             ],
             "registration_link": "https://nvl5h9qum1.zite.so",
             "registration_button_text": "Apply for FFT #001",
+            "capacity": 20,
+            "spots_filled": 14,
             "status": "upcoming",
             "display_order": 1,
             "created_at": _now(),
         })
+    else:
+        # Backfill new fields on the already-seeded FFT event (only if missing)
+        fft_defaults = {
+            "cover_image_url": fft_cover,
+            "capacity": 20,
+            "spots_filled": 14,
+        }
+        upd = {k: v for k, v in fft_defaults.items() if k not in existing_fft}
+        if upd:
+            await db.events.update_one({"title": fft_title}, {"$set": upd})
+
+    # Migrate any other existing events with the new fields
+    async for ev in db.events.find({}):
+        upd = {}
+        if "cover_image_url" not in ev:
+            upd["cover_image_url"] = None
+        if "capacity" not in ev:
+            upd["capacity"] = 0
+        if "spots_filled" not in ev:
+            upd["spots_filled"] = 0
+        if upd:
+            await db.events.update_one({"id": ev["id"]}, {"$set": upd})

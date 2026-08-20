@@ -52,8 +52,16 @@ def build_events_router(db, verify_admin, get_current_user):
         ev = await db.events.find_one({"id": event_id}, {"_id": 0})
         if not ev:
             raise HTTPException(404, "Event not found")
+        # If replying, validate the parent exists for this event
+        if inp.parent_id:
+            parent = await db.event_comments.find_one(
+                {"id": inp.parent_id, "event_id": event_id}, {"_id": 0}
+            )
+            if not parent:
+                raise HTTPException(404, "Parent comment not found")
         c = EventComment(
             event_id=event_id,
+            parent_id=inp.parent_id,
             user_id=user["user_id"],
             user_name=user["name"],
             user_email=user["email"],
@@ -63,6 +71,20 @@ def build_events_router(db, verify_admin, get_current_user):
         c["created_at"] = c["created_at"].isoformat()
         await db.event_comments.insert_one(c)
         return _serialize(c)
+
+    @router.post("/events/{event_id}/interest")
+    async def register_interest(event_id: str):
+        """Public: bump the 'spots filled' counter when someone taps Register.
+        Best-effort, capped at capacity so it never exceeds the total seats."""
+        ev = await db.events.find_one({"id": event_id}, {"_id": 0})
+        if not ev:
+            raise HTTPException(404, "Event not found")
+        capacity = ev.get("capacity", 0) or 0
+        filled = ev.get("spots_filled", 0) or 0
+        if capacity and filled < capacity:
+            filled += 1
+            await db.events.update_one({"id": event_id}, {"$set": {"spots_filled": filled}})
+        return {"spots_filled": filled, "capacity": capacity}
 
     # ============ ADMIN ============
 
@@ -97,7 +119,9 @@ def build_events_router(db, verify_admin, get_current_user):
 
     @router.delete("/admin/events/comments/{comment_id}")
     async def admin_delete_event_comment(comment_id: str, _: str = Depends(verify_admin)):
+        # Cascade delete any replies to this comment as well
         await db.event_comments.delete_one({"id": comment_id})
+        await db.event_comments.delete_many({"parent_id": comment_id})
         return {"success": True}
 
     return router
