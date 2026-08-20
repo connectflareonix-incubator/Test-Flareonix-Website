@@ -30,9 +30,9 @@ const HomePage = () => {
   ];
 
   const stats = [
-    { value: "1000+", label: "Community Members" },
-    { value: "50+", label: "Projects Launched" },
-    { value: "₹10L+", label: "Earnings Generated" },
+    { value: "100+", label: "Community Members" },
+    { value: "5+", label: "Projects Launched" },
+    { value: "₹50k+", label: "Earnings Generated" },
     { value: "24/7", label: "Support & Mentorship" },
   ];
 
