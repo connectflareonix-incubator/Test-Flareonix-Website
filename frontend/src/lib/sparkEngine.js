@@ -18,6 +18,7 @@ class SparkEngine {
     this.fps = 60;
     this.frameTimes = [];
     this.lastFrame = performance.now();
+    this.lastMoveTime = 0;
     this.boundResize = this.resize.bind(this);
     this.boundMove = this.onMouseMove.bind(this);
     this.hoverElements = new WeakSet();
@@ -90,6 +91,7 @@ class SparkEngine {
     const dx = this.cursor.x - this.cursor.px;
     const dy = this.cursor.y - this.cursor.py;
     this.cursor.speed = Math.sqrt(dx * dx + dy * dy);
+    this.lastMoveTime = performance.now();
   }
 
   spawnAmbient() {
@@ -221,15 +223,24 @@ class SparkEngine {
     const w = window.innerWidth;
     const h = window.innerHeight;
 
-    // Spawn cursor sparks based on speed
+    // Treat the pointer as idle if it hasn't moved recently. This stops the
+    // cursor/hover spark emitters from leaving a permanent cluster on screen
+    // (especially after a tap on touch devices where mouseleave never fires).
+    const idle = (performance.now() - this.lastMoveTime) > 350;
+
+    // Spawn cursor sparks based on speed — ONLY while the cursor is actually
+    // moving. Previously this had a floor of n=2 which kept emitting a fountain
+    // of sparks at the last cursor/tap position forever (bug: sparks "stuck" on
+    // screen when idle or after a tap). Now idle => no cursor sparks.
     const s = this.cursor.speed;
-    let n = 2;
+    let n = 0;
     if (s > 15) n = this.cursorSparksMax;
     else if (s > 5) n = Math.min(this.cursorSparksMax, Math.round(2 + (s - 5) * 0.4));
-    if (this.cursor.x > -9000) this.spawnCursorSparks(Math.min(n, this.cursorSparksMax));
+    else if (s > 2.5) n = 2;
+    if (!idle && n > 0 && this.cursor.x > -9000) this.spawnCursorSparks(Math.min(n, this.cursorSparksMax));
 
-    // Hover sparks
-    if (this.hoveredEl && document.contains(this.hoveredEl)) {
+    // Hover sparks — only while actively hovering AND the pointer is moving.
+    if (!idle && this.hoveredEl && document.contains(this.hoveredEl)) {
       const rect = this.hoveredEl.getBoundingClientRect();
       this.spawnHoverSparks(rect, 8);
     }
@@ -315,6 +326,7 @@ export function startSparkEngine() {
   if (_instance) return _instance;
   _instance = new SparkEngine();
   _instance.init();
+  if (typeof window !== "undefined") window.__sparkEngine = _instance;
   return _instance;
 }
 
